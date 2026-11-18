@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+
+<!-- HERO -->
+<section class="artigos-hero">
+    <div class="artigos-hero-content">
+        <div class="hero-badge">📚 Ciência & Conhecimento</div>
+        <h2 class="hero-title">Artigos Médicos</h2>
+        <p class="hero-desc">
+            Publicações científicas revisadas sobre <strong>Miastenia Congênita</strong>.
+            Todo o conteúdo é validado pela nossa equipe antes de ser publicado,
+            garantindo informação confiável e acessível.
+        </p>
+        <div class="hero-tags">
+            <span class="tag">🔬 Revisados</span>
+            <span class="tag">📖 Científicos</span>
+            <span class="tag">✅ Validados</span>
+        </div>
+    </div>
+    <div class="artigos-hero-stats">
+        <div class="stat-card">
+            <span class="stat-num">2</span>
+            <span class="stat-label">Artigos</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Validados</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">🇧🇷</span>
+            <span class="stat-label">Em Português</span>
+        </div>
+    </div>
+</section>
+
+<!-- AVISO -->
+<div class="artigos-aviso">
+    <span class="aviso-icon">ℹ️</span>
+    <p>
+        Usuários cadastrados podem <strong>sugerir artigos</strong> publicados em revistas científicas ou
+        plataformas reconhecidas. Todos os envios passam por um processo de validação antes de aparecerem aqui.
+    </p>
+</div>
+
+<!-- FILTRO / BUSCA (visual) -->
+<section class="artigos-filtro">
+    <div class="filtro-inner">
+        <div class="filtro-input-wrap">
+            <span class="filtro-icon">🔍</span>
+            <input type="text" id="busca-artigo" class="filtro-input" placeholder="Buscar artigo por título ou autor..." />
+        </div>
+    </div>
+</section>
+
+<!-- LISTA DE ARTIGOS -->
+<section class="artigos-lista" id="lista-artigos-section">
+
+    <!-- Artigo 1 -->
+    <article class="artigo-card" data-busca="lorenzoni síndrome miastênica congênita canal lento estudo neurofisiológico">
+        <div class="artigo-card-header">
+            <span class="artigo-tipo">📄 Relato de Caso</span>
+            <span class="artigo-ano">2006</span>
+        </div>
+        <h3 class="artigo-titulo">
+            <a href="https://www.scielo.br/j/anp/a/JW4v4hkFCxv8GKHwtCxJmMr/?lang=pt"
+               target="_blank" rel="noopener noreferrer">
+                Estudo neurofisiológico na síndrome miastênica congênita do canal lento: relato de caso
+            </a>
+        </h3>
+        <p class="artigo-autores">
+            <span class="autores-label">✍️ Autores:</span>
+            LORENZONI, Paulo José; KAY, Cláudia Suely Kamoi; ARRUDA, Walter Oleschko;
+            SCOLA, Rosana Herminia; WERNECK, Lineu César.
+        </p>
+        <div class="artigo-footer">
+            <span class="artigo-revista">
+                📰 <em>Arquivos de Neuro-Psiquiatria</em>, São Paulo, v. 64, n. 2A, p. 328–332, jun. 2006.
+            </span>
+            <a href="https://www.scielo.br/j/anp/a/JW4v4hkFCxv8GKHwtCxJmMr/?lang=pt"
+               target="_blank" rel="noopener noreferrer" class="artigo-btn-link">
+                Ler artigo →
+            </a>
+        </div>
+    </article>
+
+    <!-- Artigo 2 -->
+    <article class="artigo-card" data-busca="romaneli evento aparente risco morte síndrome miastênica congênita">
+        <div class="artigo-card-header">
+            <span class="artigo-tipo">📄 Relato de Caso</span>
+            <span class="artigo-ano">2013</span>
+        </div>
+        <h3 class="artigo-titulo">
+            <a href="https://www.scielo.br/j/rpp/a/HtpxhKYDYKZhw96MLzTL9dG/?lang=pt"
+               target="_blank" rel="noopener noreferrer">
+                Evento com aparente risco de morte recorrente como manifestação inicial de síndrome miastênica congênita
+            </a>
+        </h3>
+        <p class="artigo-autores">
+            <span class="autores-label">✍️ Autores:</span>
+            ROMANELI, Mariana Tresoldi das Neves; CASTRO, Carla Cristina T. de S.; FRAGA, Andrea de Melo A.;
+            LOMAZI, Elizete Aparecida; NUCCI, Anamari; TRESOLDI, Antonia Teresinha.
+        </p>
+        <div class="artigo-footer">
+            <span class="artigo-revista">
+                📰 <em>Revista Paulista de Pediatria</em>, São Paulo, v. 31, n. 1, p. 130–135, mar. 2013.
+            </span>
+            <a href="https://www.scielo.br/j/rpp/a/HtpxhKYDYKZhw96MLzTL9dG/?lang=pt"
+               target="_blank" rel="noopener noreferrer" class="artigo-btn-link">
+                Ler artigo →
+            </a>
+        </div>
+    </article>
+
+    <!-- Nenhum resultado -->
+    <div class="artigos-vazio" id="artigos-vazio" style="display:none;">
+        <span>🔍</span>
+        <p>Nenhum artigo encontrado para essa busca.</p>
+    </div>
+
+</section>
+
+<!-- CTA SUGERIR -->
+<section class="cta-section">
+    <div class="cta-box">
+        <h3>Conhece um artigo importante sobre SMC?</h3>
+        <p>Usuários cadastrados podem sugerir novos artigos para enriquecer nossa base de conhecimento.</p>
+        <a href="{{ url_for('principal') }}" class="btn-cta">Sugerir Artigo 📚</a>
+    </div>
+</section>
+
+<!-- Script de busca -->
+<script>
+    const input = document.getElementById('busca-artigo');
+    const cards = document.querySelectorAll('.artigo-card');
+    const vazio = document.getElementById('artigos-vazio');
+
+    input.addEventListener('input', () => {
+        const termo = input.value.toLowerCase().trim();
+        let visiveis = 0;
+        cards.forEach(card => {
+            const texto = card.dataset.busca + ' ' + card.innerText.toLowerCase();
+            const visivel = texto.includes(termo);
+            card.style.display = visivel ? '' : 'none';
+            if (visivel) visiveis++;
+        });
+        vazio.style.display = visiveis === 0 ? 'flex' : 'none';
+    });
+</script>
+
+{% endblock %}

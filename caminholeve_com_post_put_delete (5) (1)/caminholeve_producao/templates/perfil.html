@@ -1,0 +1,578 @@
+{% extends "base.html" %}
+
+{#
+   perfil.html — PÁGINA "MEU PERFIL" (exige login)
+   Recebe `usuario` (objeto Usuario) do UsuarioController.exibir_perfil.
+   Duas abas: 'Dados pessoais' e 'Segurança' (troca de senha).
+#}
+{% block conteudo %}
+<div class="perfil-container">
+
+    {#
+       Avatar (inicial do nome), nome, e-mail e selos (tipo de conta, ativo/inativo, 'membro desde').
+    #}
+    <!-- CABEÇALHO DO PERFIL -->
+    <header class="perfil-header-card">
+        <div class="perfil-avatar-wrap">
+            <span class="perfil-avatar-circle">
+                {{ usuario.get_nome_exibicao()[:1]|upper if usuario.get_nome_exibicao() else 'U' }}
+            </span>
+            <div class="perfil-avatar-info">
+                <h2>{{ usuario.get_nome_exibicao() }}</h2>
+                {% if usuario.get_nickname() %}
+                <p class="perfil-email">👤 {{ usuario.get_nome() }}</p>
+                {% endif %}
+                <p class="perfil-email">📧 {{ usuario.get_email() }}</p>
+                <div class="perfil-badges">
+                    {% if usuario.get_tipo() == 'ADM' %}
+                    <span class="badge-adm">🛡️ Administrador</span>
+                    {% else %}
+                    <span class="badge-portador">🫶 {{ usuario.get_tipo() or 'Membro' }}</span>
+                    {% endif %}
+
+                    {% if usuario.get_ativo() == 'S' %}
+                    <span class="badge-status-ativo">● Conta Ativa</span>
+                    {% else %}
+                    <span class="badge-status-inativo">● Conta Inativa</span>
+                    {% endif %}
+
+                    {% if usuario.get_criado_em() %}
+                    <span class="badge-data-registro">Membro desde {{ usuario.get_criado_em().strftime('%d/%m/%Y') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('principal') }}" class="btn-voltar-perfil">← Voltar ao Início</a>
+        </div>
+    </header>
+
+    {#
+       Botões das abas. onclick chama alternarAbaPerfil() (no final do arquivo).
+    #}
+    <!-- NAVEGAÇÃO DE ABAS DO PERFIL -->
+    <div class="perfil-tabs-nav">
+        <button class="perfil-tab-btn active" onclick="alternarAbaPerfil('aba-dados', this)">
+            👤 Dados Pessoais
+        </button>
+        <button class="perfil-tab-btn" onclick="alternarAbaPerfil('aba-senha', this)">
+            🔒 Segurança & Senha
+        </button>
+    </div>
+
+    {#
+       Aba 1: edição de nome, cidade, estado e nascimento.
+    #}
+    <!-- CONTEÚDO 1: DADOS PESSOAIS -->
+    <section id="aba-dados" class="perfil-tab-pane active">
+        <div class="perfil-box">
+            <div class="perfil-box-header">
+                <div>
+                    <h3>Meus Dados Pessoais</h3>
+                    <p>Mantenha suas informações cadastrais atualizadas para melhorar sua experiência na comunidade.</p>
+                </div>
+            </div>
+
+            {#
+               Envia para POST /perfil/atualizar. Os campos já vêm preenchidos com os dados atuais ({{ usuario.get_xxx() }}).
+            #}
+            <form action="{{ url_for('perfil_atualizar') }}" method="POST" class="perfil-form">
+                {#
+                   readonly: o e-mail não pode ser mudado porque é a chave primária do usuário.
+                #}
+                <!-- E-mail (Somente Leitura) -->
+                <div class="form-group-perfil">
+                    <label for="perfil_email">E-mail Cadastrado</label>
+                    <input type="email" id="perfil_email" value="{{ usuario.get_email() }}" class="input-perfil disabled" readonly>
+                    <small class="form-hint">O e-mail é sua chave única de acesso e identificação, por isso não pode ser alterado.</small>
+                </div>
+
+                <!-- Nome Completo -->
+                <div class="form-group-perfil">
+                    <label for="perfil_nome">Nome Completo <span class="required">*</span></label>
+                    <input type="text" id="perfil_nome" name="nome" value="{{ usuario.get_nome() }}" required class="input-perfil" placeholder="Seu nome completo">
+                </div>
+
+                <!-- Apelido (nickname): nome público no fórum, respostas e relatos -->
+                <div class="form-group-perfil">
+                    <label for="perfil_nickname">Apelido (nickname) <span class="required">*</span></label>
+                    <input type="text" id="perfil_nickname" name="nickname" value="{{ usuario.get_nickname() or '' }}" required
+                        minlength="3" maxlength="30" pattern="[A-Za-zÀ-ÿ0-9._\-]{3,30}"
+                        title="De 3 a 30 caracteres: letras, números, ponto, hífen ou underline, sem espaços."
+                        class="input-perfil" placeholder="Como você quer aparecer no site">
+                    <small class="form-hint">
+                        {% if usuario.get_nickname() %}
+                        É este nome que aparece nas suas publicações, respostas e relatos.
+                        {% else %}
+                        Você ainda não tem um apelido: hoje o site mostra seu nome completo. Defina um apelido para preservar sua privacidade.
+                        {% endif %}
+                    </small>
+                </div>
+
+                <!-- Linha: Cidade e Estado -->
+                <div class="form-row-perfil-2">
+                    <div class="form-group-perfil">
+                        <label for="perfil_cidade">Cidade</label>
+                        <input type="text" id="perfil_cidade" name="cidade" value="{{ usuario.get_cidade() or '' }}" class="input-perfil" placeholder="Ex: São Paulo">
+                    </div>
+
+                    <div class="form-group-perfil">
+                        <label for="perfil_estado">Estado (UF)</label>
+                        <select id="perfil_estado" name="estado" class="input-perfil">
+                            <option value="">Selecione seu Estado</option>
+                            {% set estados = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] %}
+                            {% for uf in estados %}
+                            <option value="{{ uf }}" {% if usuario.get_estado() == uf %}selected{% endif %}>{{ uf }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Data de Nascimento -->
+                <div class="form-group-perfil">
+                    <label for="perfil_nascimento">Data de Nascimento</label>
+                    <input type="date" id="perfil_nascimento" name="nascimento" 
+                           value="{{ usuario.get_nascimento() if usuario.get_nascimento() else '' }}" class="input-perfil">
+                </div>
+
+                <!-- Botão de Salvar -->
+                <div class="perfil-footer-actions">
+                    <button type="submit" class="btn-salvar-perfil">
+                        Salvar Alterações ✨
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    {#
+       Aba 2: troca de senha.
+    #}
+    <!-- CONTEÚDO 2: SEGURANÇA E TROCA DE SENHA -->
+    <section id="aba-senha" class="perfil-tab-pane">
+        <div class="perfil-box">
+            <div class="perfil-box-header">
+                <div>
+                    <h3>Alteração de Senha</h3>
+                    <p>Por motivos de segurança, informe sua senha atual antes de cadastrar uma nova senha.</p>
+                </div>
+            </div>
+
+            {#
+               Envia para POST /perfil/senha. onsubmit="return validarTrocaSenha();" — se a função devolver false, o envio é cancelado.
+            #}
+            <form action="{{ url_for('perfil_senha') }}" method="POST" class="perfil-form" onsubmit="return validarTrocaSenha();">
+                <!-- Senha Atual -->
+                <div class="form-group-perfil">
+                    <label for="senha_atual">Senha Atual <span class="required">*</span></label>
+                    <input type="password" id="senha_atual" name="senha_atual" required class="input-perfil" placeholder="Digite sua senha atual">
+                </div>
+
+                <!-- Linha: Nova Senha e Confirmação -->
+                <div class="form-row-perfil-2">
+                    <div class="form-group-perfil">
+                        <label for="nova_senha">Nova Senha <span class="required">*</span></label>
+                        <input type="password" id="nova_senha" name="nova_senha" required minlength="6" class="input-perfil" placeholder="Mínimo 6 caracteres">
+                        <small class="form-hint">Mínimo 6 caracteres, com pelo menos 1 letra maiúscula (A-Z) e 1 número (0-9).</small>
+                    </div>
+
+                    <div class="form-group-perfil">
+                        <label for="confirmar_nova_senha">Confirmar Nova Senha <span class="required">*</span></label>
+                        <input type="password" id="confirmar_nova_senha" name="confirmar_nova_senha" required minlength="6" class="input-perfil" placeholder="Repita a nova senha">
+                    </div>
+                </div>
+
+                <div id="msgErroSenha" style="display: none; color: #c62828; font-size: 0.88rem; font-weight: 600; margin-bottom: 1rem;"></div>
+
+                <!-- Botão de Atualizar Senha -->
+                <div class="perfil-footer-actions">
+                    <button type="submit" class="btn-salvar-senha">
+                        🔒 Atualizar Senha
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</div>
+
+{#
+   CSS exclusivo desta página (as classes .perfil-*).
+#}
+<style>
+.perfil-container {
+    max-width: 900px;
+    margin: 2rem auto 4rem;
+    padding: 0 1.5rem;
+}
+
+/* HEADER CARD */
+.perfil-header-card {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 60%, var(--purple-mid) 100%);
+    border-radius: var(--radius-lg);
+    padding: 2.2rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    box-shadow: 0 10px 30px rgba(74, 20, 140, 0.22);
+    margin-bottom: 2rem;
+}
+
+.perfil-avatar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.perfil-avatar-circle {
+    width: 76px;
+    height: 76px;
+    background: #fff;
+    color: var(--purple-dark);
+    font-size: 2.2rem;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.perfil-avatar-info h2 {
+    font-size: 1.65rem;
+    color: #fff;
+    margin: 0 0 0.2rem;
+    font-weight: 700;
+}
+
+.perfil-email {
+    font-size: 0.95rem;
+    color: #ede7f6;
+    margin: 0 0 0.6rem;
+}
+
+.perfil-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.badge-adm {
+    background: #ffd54f;
+    color: #3e2723;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+}
+
+.badge-portador {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+}
+
+.badge-status-ativo {
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+}
+
+.badge-status-inativo {
+    background: #ffebee;
+    color: #c62828;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+}
+
+.badge-data-registro {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ede7f6;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+}
+
+.btn-voltar-perfil {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    text-decoration: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 25px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-voltar-perfil:hover {
+    background: #fff;
+    color: var(--purple-dark);
+}
+
+/* ABAS */
+.perfil-tabs-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e1bee7;
+}
+
+.perfil-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.85rem 1.4rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    position: relative;
+    transition: var(--transition);
+}
+
+.perfil-tab-btn:hover {
+    color: var(--purple-main);
+    background: rgba(106, 27, 154, 0.04);
+}
+
+.perfil-tab-btn.active {
+    color: var(--purple-dark);
+    font-weight: 700;
+}
+
+.perfil-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--purple-main);
+    border-radius: 3px 3px 0 0;
+}
+
+.perfil-tab-pane {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.perfil-tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* CAIXA DO FORMULÁRIO */
+.perfil-box {
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 2.2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(106, 27, 154, 0.08);
+}
+
+.perfil-box-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0edf5;
+}
+
+.perfil-box-header h3 {
+    color: var(--purple-dark);
+    font-size: 1.35rem;
+    margin: 0 0 0.25rem;
+    font-weight: 700;
+}
+
+.perfil-box-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.perfil-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group-perfil {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-perfil label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.form-group-perfil label .required {
+    color: #e53935;
+}
+
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+}
+
+.input-perfil {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1c4e9;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+    background: #fdfcff;
+}
+
+.input-perfil:focus {
+    border-color: var(--purple-main);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+    background: #fff;
+}
+
+.input-perfil.disabled {
+    background: #f5f5f7;
+    color: #777;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
+.form-row-perfil-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.perfil-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.btn-salvar-perfil {
+    background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-mid) 100%);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(106, 27, 154, 0.25);
+    transition: var(--transition);
+}
+
+.btn-salvar-perfil:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 27, 154, 0.35);
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 100%);
+}
+
+.btn-salvar-senha {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25);
+    transition: var(--transition);
+}
+
+.btn-salvar-senha:hover {
+    background: #1b5e20;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.35);
+}
+
+@media (max-width: 650px) {
+    .perfil-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.75rem;
+    }
+    .form-row-perfil-2 {
+        grid-template-columns: 1fr;
+    }
+    .btn-salvar-perfil, .btn-salvar-senha {
+        width: 100%;
+    }
+}
+</style>
+
+{#
+   JavaScript desta página.
+#}
+<script>
+// Troca de aba: remove a classe 'active' de todas as abas/botões e coloca só na escolhida.
+function alternarAbaPerfil(abaId, btnElement) {
+    const panes = document.querySelectorAll('.perfil-tab-pane');
+    panes.forEach(pane => pane.classList.remove('active'));
+
+    const btns = document.querySelectorAll('.perfil-tab-btn');
+    btns.forEach(btn => btn.classList.remove('active'));
+
+    const alvo = document.getElementById(abaId);
+    if (alvo) alvo.classList.add('active');
+    btnElement.classList.add('active');
+}
+
+// Valida a nova senha no navegador (6+ caracteres, maiúscula, número, confirmação). Retorna false para BLOQUEAR o envio e mostra o erro na tela.
+function validarTrocaSenha() {
+    const nova = document.getElementById('nova_senha').value;
+    const conf = document.getElementById('confirmar_nova_senha').value;
+    const msg = document.getElementById('msgErroSenha');
+
+    if (nova.length < 6) {
+        msg.textContent = 'A nova senha deve ter no mínimo 6 caracteres.';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    if (!/[A-Z]/.test(nova)) {
+        msg.textContent = 'A nova senha deve conter pelo menos uma letra maiúscula (A-Z).';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    if (!/[0-9]/.test(nova)) {
+        msg.textContent = 'A nova senha deve conter pelo menos um número (0-9).';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    if (nova !== conf) {
+        msg.textContent = 'A nova senha e a confirmação não conferem.';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    msg.style.display = 'none';
+    return true;
+}
+</script>
+{% endblock %}

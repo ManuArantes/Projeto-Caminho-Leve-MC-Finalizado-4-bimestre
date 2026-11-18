@@ -1,0 +1,1011 @@
+{% extends "base.html" %}
+
+{#
+artigos.html — PÁGINA DE ARTIGOS MÉDICOS
+Variáveis recebidas do ArtigoController.artigos():
+artigos -> lista de objetos Artigo APROVADOS
+total -> quantidade (contador do topo)
+minhas_sugestoes -> sugestões do usuário logado (qualquer status)
+Funcionalidades: lista pública, busca instantânea (JS), modal para sugerir artigo, 'Minhas sugestões'.
+#}
+{% block conteudo %}
+
+{#
+Topo com título, explicação e contador ({{ total }}).
+#}
+<!-- HERO -->
+<section class="artigos-hero">
+    <div class="artigos-hero-content">
+        <div class="hero-badge">📚 Ciência & Conhecimento</div>
+        <h2 class="hero-title">Artigos Médicos</h2>
+        <p class="hero-desc">
+            Esta página reúne artigos científicos e materiais de referência sobre
+            <strong>Miastenia Congênita</strong> em um só lugar. Por ser uma doença
+            rara, encontrar informações em português pode ser um desafio. Aqui,
+            pacientes, familiares, estudantes e profissionais da saúde encontram
+            leituras selecionadas para ampliar seus conhecimentos e facilitar suas
+            pesquisas.
+        </p>
+        <p class="hero-desc">
+            Os artigos são disponibilizados por meio de links para as fontes
+            originais, permitindo que você consulte o conteúdo diretamente no site
+            em que foi publicado.
+        </p>
+        <p class="hero-desc">
+            A comunidade também pode contribuir: usuários cadastrados podem indicar
+            novas publicações, que passam por avaliação da administração antes de
+            serem disponibilizadas no portal.
+        </p>
+        <div class="hero-tags">
+            <span class="tag">🔬 Pesquisa científica</span>
+            <span class="tag">📖 Fontes de referência</span>
+            <span class="tag">✅ Conteúdo avaliado</span>
+        </div>
+    </div>
+
+    <div class="artigos-hero-stats">
+        <div class="stat-card">
+            <span class="stat-num">{{ total }}</span>
+            <span class="stat-label">Publicações aprovadas</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">🔎</span>
+            <span class="stat-label">Fontes para consulta</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">🌎</span>
+            <span class="stat-label">Acesso às fontes originais</span>
+        </div>
+    </div>
+</section>
+
+{#
+Cartões FIXOS (escritos à mão no HTML) com fontes recomendadas, como ABRAMI e artigos SciELO. Não vêm do banco.
+#}
+<!-- FONTES DE CONSULTA -->
+<section class="artigos-lista" id="fontes-consulta-section">
+    <div class="artigos-aviso-box">
+        <div class="aviso-conteudo">
+            <span class="aviso-icon">📚</span>
+            <div>
+                <strong>Fontes para iniciar sua pesquisa</strong>
+                <p>
+                    Reunimos abaixo links de instituições e publicações científicas
+                    relacionados à saúde e à Miastenia Congênita. Acesse os sites
+                    originais para consultar os materiais disponíveis.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+{#
+Botão de sugerir: logado -> abre o modal (JS); visitante -> vira link para /cadastro (o {% if
+session.get('usuario_email') %} decide).
+#}
+<!-- AVISO COM BOTÃO DE SUGERIR ARTIGO -->
+<div class="artigos-aviso-box">
+    <div class="aviso-conteudo">
+        <span class="aviso-icon">ℹ️</span>
+        <div>
+            <strong>Ajude a ampliar nossa base de conhecimento!</strong>
+            <p>
+                Usuários cadastrados podem indicar artigos científicos e materiais
+                relacionados à Miastenia Congênita. Basta informar o link e os dados
+                disponíveis da publicação. A indicação será avaliada pela administração
+                quanto à confiabilidade e à relevância para os objetivos da plataforma.
+                O conteúdo só será publicado após a aprovação.
+            </p>
+        </div>
+    </div>
+
+    <div class="aviso-acao">
+        {% if session.get('usuario_email') %}
+        <button type="button" class="btn-sugerir-artigo-topo" onclick="abrirModalSugerir()">
+            📚 Sugerir Artigo
+        </button>
+        {% else %}
+        <a href="{{ url_for('cadastro') }}" class="btn-sugerir-artigo-topo">
+            🔑 Entrar para Sugerir
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{#
+Só aparece se o usuário tiver sugestões. Cada uma mostra um selo de status: revisado '1' = aprovado, 'R' = rejeitado,
+senão = pendente.
+#}
+<!-- SEÇÃO: MINHAS SUGESTÕES -->
+{% if minhas_sugestoes %}
+<section class="minhas-sugestoes-section">
+    <div class="minhas-sugestoes-header" onclick="toggleMinhasSugestoes()">
+        <h4>
+            <span>📑 Minhas Indicações de Artigos</span>
+            <span class="badge-contador-sugestoes">{{ minhas_sugestoes|length }}</span>
+        </h4>
+        <span id="iconeToggleSugestoes" class="toggle-arrow">▼</span>
+    </div>
+
+    <div id="listaMinhasSugestoes" class="minhas-sugestoes-corpo" style="display: none;">
+        <p class="minhas-sugestoes-desc">
+            Acompanhe o andamento das suas indicações e consulte o status
+            de avaliação de cada publicação enviada.
+        </p>
+
+        <div class="sugestoes-grid">
+            {% for s in minhas_sugestoes %}
+            <div class="sugestao-card">
+                <div class="sugestao-card-top">
+                    <span class="sugestao-tipo">📄 {{ s.get_tipo() or 'Artigo' }}</span>
+
+                    {% if s.get_revisado() in ['1', 'S'] %}
+                    <span class="badge-status-sugestao aprovado">✓ Aprovado & Publicado</span>
+                    {% elif s.get_revisado() == 'R' %}
+                    <span class="badge-status-sugestao rejeitado">✕ Não Aprovado</span>
+                    {% else %}
+                    <span class="badge-status-sugestao pendente">⏳ Em Análise pela Administração</span>
+                    {% endif %}
+                </div>
+
+                <h5 class="sugestao-titulo">{{ s.get_titulo() }}</h5>
+
+                <p class="sugestao-meta">
+                    {% if s.get_autor() %}✍️ {{ s.get_autor() }} &bull; {% endif %}
+                    {% if s.get_origem() %}📰 {{ s.get_origem() }} &bull; {% endif %}
+                    {% if s.get_ano_artigo() %}Ano: {{ s.get_ano_artigo() }}{% endif %}
+                </p>
+
+                {% if s.get_url() %}
+                <a href="{{ s.get_url() }}" target="_blank" rel="noopener noreferrer" class="sugestao-link">
+                    🔗 Acessar link enviado ↗
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{#
+Campo de busca; o filtro acontece no navegador (JS no final), sem recarregar a página.
+#}
+<!-- FILTRO / BUSCA -->
+<section class="artigos-filtro">
+    <div class="filtro-inner">
+        <div class="filtro-input-wrap">
+            <span class="filtro-icon">🔍</span>
+            <input type="text" id="busca-artigo" class="filtro-input"
+                placeholder="Buscar artigo por título, autor ou fonte..." />
+        </div>
+    </div>
+</section>
+
+{#
+LISTA VINDA DO BANCO: o {% for artigo in artigos %} repete o cartão para cada artigo aprovado.
+data-busca guarda título/autor/origem em minúsculas para o filtro de busca usar.
+#}
+<!-- LISTA DE ARTIGOS APROVADOS PELO SISTEMA -->
+<section class="artigos-lista" id="lista-artigos-section">
+    {% if artigos %}
+    {% for artigo in artigos %}
+    <article class="artigo-card"
+        data-busca="{{ artigo.get_titulo()|lower }} {{ artigo.get_autor()|lower }} {{ artigo.get_origem()|lower }}">
+        <div class="artigo-card-header">
+            <span class="artigo-tipo">📄 {{ artigo.get_tipo() or 'Artigo Científico' }}</span>
+
+            {% if artigo.get_ano_artigo() %}
+            <span class="artigo-ano">{{ artigo.get_ano_artigo() }}</span>
+            {% elif artigo.get_criado_em() %}
+            <span class="artigo-ano">{{ artigo.get_criado_em().strftime('%Y') }}</span>
+            {% endif %}
+        </div>
+
+        <h3 class="artigo-titulo">
+            <a href="{{ artigo.get_url() }}" target="_blank" rel="noopener noreferrer">
+                {{ artigo.get_titulo() }}
+            </a>
+        </h3>
+
+        {% if artigo.get_autor() %}
+        <p class="artigo-autores">
+            <span class="autores-label">✍️ Autores:</span>
+            {{ artigo.get_autor() }}
+        </p>
+        {% endif %}
+
+        <div class="artigo-footer">
+            {% if artigo.get_origem() %}
+            <span class="artigo-revista">
+                📰 <em>{{ artigo.get_origem() }}</em>
+            </span>
+            {% endif %}
+
+            <a href="{{ artigo.get_url() }}" target="_blank" rel="noopener noreferrer" class="artigo-btn-link">
+                Ler artigo →
+            </a>
+        </div>
+    </article>
+    {% endfor %}
+    {% else %}
+    <div class="artigos-vazio" style="display:flex;">
+        <span>📭</span>
+        <p>
+            Ainda não há indicações aprovadas cadastradas nesta seção.
+            Você pode contribuir sugerindo uma publicação relacionada à
+            Miastenia Congênita.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Nenhum resultado da busca -->
+    <div class="artigos-vazio" id="artigos-vazio" style="display:none;">
+        <span>🔍</span>
+        <p>Nenhum artigo encontrado para essa busca.</p>
+    </div>
+
+    {% if artigos %}
+    <!-- PAGINAÇÃO (3 ARTIGOS POR PÁGINA) -->
+    <nav class="artigos-paginacao" id="artigos-paginacao" aria-label="Paginação de artigos médicos">
+        <div class="paginacao-controles" id="paginacao-controles"></div>
+        <p class="paginacao-info" id="paginacao-info"></p>
+    </nav>
+    {% endif %}
+</section>
+
+<!-- CTA SUGERIR NO FINAL DA PÁGINA -->
+<section class="cta-section">
+    <div class="cta-box">
+        <h3>Conhece uma publicação importante sobre Miastenia Congênita?</h3>
+        <p>
+            Compartilhe sua indicação com o Caminho Leve MC. Sua contribuição
+            pode ajudar a ampliar o acesso ao conhecimento científico e facilitar
+            a busca por informações sobre a doença.
+        </p>
+
+        {% if session.get('usuario_email') %}
+        <button type="button" class="btn-cta" onclick="abrirModalSugerir()">
+            Sugerir Artigo 📚
+        </button>
+        {% else %}
+        <a href="{{ url_for('cadastro') }}" class="btn-cta">
+            Entre para Sugerir 📚
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+{#
+Janela (modal) com o formulário de sugestão, escondida até o JS abri-la.
+#}
+<!-- MODAL SUGERIR ARTIGO MÉDICO -->
+<div id="modalSugerir" class="modal-sugerir-wrapper" style="display: none;">
+    <div class="modal-sugerir-backdrop" onclick="fecharModalSugerir()"></div>
+
+    <div class="modal-sugerir-card">
+        <button type="button" class="modal-btn-fechar" onclick="fecharModalSugerir()">✕</button>
+
+        <div class="modal-header-info">
+            <span class="modal-badge-icone">📚 Indicação científica</span>
+            <h3>Sugerir Artigo Científico</h3>
+            <p>
+                Informe os dados disponíveis da publicação e seu link oficial.
+                A indicação será encaminhada para avaliação administrativa e
+                só será exibida no portal após a aprovação.
+            </p>
+        </div>
+
+        {#
+        Envia para POST /artigo/sugerir. O artigo entra como PENDENTE e só aparece na lista pública após aprovação do
+        ADM.
+        #}
+        <form action="{{ url_for('artigo_sugerir') }}" method="POST" class="form-sugerir-artigo">
+            <!-- Título -->
+            <div class="form-campo">
+                <label for="campo_titulo">Título do Artigo / Estudo <span class="req">*</span></label>
+                <input type="text" id="campo_titulo" name="titulo" required
+                    placeholder="Informe o título completo da publicação" class="input-form">
+            </div>
+
+            <!-- URL / Link -->
+            <div class="form-campo">
+                <label for="campo_url">Link oficial da publicação <span class="req">*</span></label>
+                <input type="url" id="campo_url" name="url" required placeholder="https://..." class="input-form">
+            </div>
+
+            <!-- Grid: Ano e Tipo -->
+            <div class="form-grid-2">
+                <div class="form-campo">
+                    <label for="campo_ano">Ano da publicação</label>
+                    <input type="number" id="campo_ano" name="ano_artigo" min="1950" max="2030" placeholder="Ex.: 2024"
+                        class="input-form">
+                </div>
+
+                <div class="form-campo">
+                    <label for="campo_tipo">Tipo de publicação</label>
+                    <select id="campo_tipo" name="tipo" class="input-form">
+                        <option value="Artigo Científico">Artigo Científico</option>
+                        <option value="Relato de Caso">Relato de Caso</option>
+                        <option value="Revisão Sistemática">Revisão Sistemática</option>
+                        <option value="Ensaio Clínico">Ensaio Clínico</option>
+                        <option value="Diretriz Clínica">Diretriz Clínica</option>
+                        <option value="Material Institucional">Material Institucional</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Autores -->
+            <div class="form-campo">
+                <label for="campo_autor">Autores da publicação</label>
+                <input type="text" id="campo_autor" name="autor" placeholder="Informe os autores, se disponíveis"
+                    class="input-form">
+            </div>
+
+            <!-- Origem / Revista -->
+            <div class="form-campo">
+                <label for="campo_origem">Revista / Fonte / Origem</label>
+                <input type="text" id="campo_origem" name="origem"
+                    placeholder="Ex.: SciELO, revista científica ou instituição" class="input-form">
+            </div>
+
+            <!-- Aviso de moderação -->
+            <div class="aviso-moderacao-box">
+                <span class="icon">⏳</span>
+                <div>
+                    <strong>Como funciona a avaliação?</strong>
+                    <p>
+                        Após o envio, a indicação ficará pendente de análise.
+                        A administração verificará a confiabilidade e a relevância
+                        do material. A publicação não será exibida no acervo
+                        enquanto não for aprovada.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="modal-acoes-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModalSugerir()">Cancelar</button>
+                <button type="submit" class="btn-submeter">Enviar para avaliação</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{#
+CSS exclusivo desta página.
+#}
+<style>
+    /* AVISO BOX COM BOTÃO */
+    .artigos-aviso-box {
+        background: #fff;
+        border: 1px solid #e1bee7;
+        border-left: 6px solid var(--purple-main);
+        border-radius: var(--radius-md);
+        padding: 1.5rem 1.8rem;
+        margin: 1.5rem auto;
+        max-width: 900px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .aviso-conteudo {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .aviso-conteudo .aviso-icon {
+        font-size: 1.6rem;
+        line-height: 1.2;
+    }
+
+    .aviso-conteudo strong {
+        color: var(--purple-dark);
+        font-size: 1rem;
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+
+    .aviso-conteudo p {
+        font-size: 0.9rem;
+        color: var(--text-body);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .btn-sugerir-artigo-topo {
+        background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-mid) 100%);
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(106, 27, 154, 0.2);
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+    }
+
+    .btn-sugerir-artigo-topo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(106, 27, 154, 0.35);
+        background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 100%);
+        color: #fff;
+    }
+
+    /* MINHAS SUGESTÕES */
+    .minhas-sugestoes-section {
+        max-width: 900px;
+        margin: 0 auto 2rem;
+        background: #fff;
+        border-radius: var(--radius-md);
+        border: 1px solid #ede7f6;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .minhas-sugestoes-header {
+        background: #fbf9fd;
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ede7f6;
+        user-select: none;
+    }
+
+    .minhas-sugestoes-header h4 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--purple-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .badge-contador-sugestoes {
+        background: var(--purple-pale);
+        color: var(--purple-main);
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 0.15rem 0.6rem;
+        border-radius: 12px;
+    }
+
+    .toggle-arrow {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        transition: transform 0.3s ease;
+    }
+
+    .minhas-sugestoes-corpo {
+        padding: 1.5rem;
+    }
+
+    .minhas-sugestoes-desc {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    .sugestoes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .sugestao-card {
+        background: #fbf9fd;
+        border: 1px solid #e1bee7;
+        border-radius: var(--radius-sm);
+        padding: 1.1rem;
+    }
+
+    .sugestao-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .sugestao-tipo {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .badge-status-sugestao {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 8px;
+    }
+
+    .badge-status-sugestao.pendente {
+        background: #fff8e1;
+        color: #e65100;
+        border: 1px solid #ffe082;
+    }
+
+    .badge-status-sugestao.aprovado {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+
+    .badge-status-sugestao.rejeitado {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+    }
+
+    .sugestao-titulo {
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        margin: 0 0 0.4rem;
+        line-height: 1.4;
+    }
+
+    .sugestao-meta {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin: 0 0 0.5rem;
+    }
+
+    .sugestao-link {
+        font-size: 0.82rem;
+        color: var(--purple-main);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .sugestao-link:hover {
+        text-decoration: underline;
+    }
+
+    /* MODAL DE SUGESTÃO */
+    .modal-sugerir-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+    }
+
+    .modal-sugerir-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(26, 0, 51, 0.65);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-sugerir-card {
+        position: relative;
+        background: #fff;
+        border-radius: var(--radius-lg);
+        max-width: 620px;
+        width: 100%;
+        padding: 2.2rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        z-index: 1;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-btn-fechar {
+        position: absolute;
+        top: 1.2rem;
+        right: 1.2rem;
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .modal-btn-fechar:hover {
+        color: var(--purple-dark);
+    }
+
+    .modal-badge-icone {
+        display: inline-block;
+        background: var(--purple-pale);
+        color: var(--purple-dark);
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-header-info h3 {
+        font-size: 1.4rem;
+        color: var(--purple-dark);
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+    }
+
+    .modal-header-info p {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        margin: 0 0 1.5rem;
+        line-height: 1.5;
+    }
+
+    .form-sugerir-artigo {
+        display: flex;
+        flex-direction: column;
+        gap: 1.15rem;
+    }
+
+    .form-campo {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-campo label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.35rem;
+    }
+
+    .form-campo label .req {
+        color: #e53935;
+    }
+
+    .input-form {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid #d1c4e9;
+        border-radius: var(--radius-sm);
+        font-size: 0.92rem;
+        font-family: inherit;
+        outline: none;
+        transition: var(--transition);
+        background: #fdfcff;
+    }
+
+    .input-form:focus {
+        border-color: var(--purple-main);
+        box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+        background: #fff;
+    }
+
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .aviso-moderacao-box {
+        background: #f8f4fc;
+        border-left: 4px solid var(--purple-light);
+        border-radius: var(--radius-sm);
+        padding: 0.9rem 1.1rem;
+        display: flex;
+        gap: 0.8rem;
+        align-items: flex-start;
+    }
+
+    .aviso-moderacao-box .icon {
+        font-size: 1.2rem;
+        line-height: 1.3;
+    }
+
+    .aviso-moderacao-box strong {
+        font-size: 0.85rem;
+        color: var(--purple-dark);
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+
+    .aviso-moderacao-box p {
+        font-size: 0.82rem;
+        color: var(--text-body);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .modal-acoes-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-cancelar {
+        background: #ede7f6;
+        color: var(--purple-dark);
+        border: none;
+        padding: 0.7rem 1.3rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-cancelar:hover {
+        background: #e1bee7;
+    }
+
+    .btn-submeter {
+        background: var(--purple-main);
+        color: #fff;
+        border: none;
+        padding: 0.7rem 1.6rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 4px 12px rgba(106, 27, 154, 0.25);
+    }
+
+    .btn-submeter:hover {
+        background: var(--purple-dark);
+        transform: translateY(-1px);
+    }
+
+    /* PAGINAÇÃO DOS ARTIGOS */
+    .artigos-paginacao {
+        margin: 2rem auto 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .paginacao-controles {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .pag-numeros {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .pag-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.9rem;
+        border-radius: 20px;
+        background: #ffffff;
+        border: 1px solid #e1bee7;
+        color: var(--purple-dark);
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pag-btn.pag-num {
+        padding: 0;
+        width: 40px;
+        border-radius: 50%;
+    }
+
+    .pag-btn:hover:not(.disabled):not(.active) {
+        background: var(--purple-pale);
+        border-color: var(--purple-main);
+        transform: translateY(-2px);
+    }
+
+    .pag-btn.active {
+        background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-mid) 100%);
+        color: #ffffff;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(106, 27, 154, 0.3);
+    }
+
+    .pag-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #f8f4fc;
+        box-shadow: none;
+    }
+
+    .paginacao-info {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    @media (max-width: 600px) {
+        .artigos-aviso-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-sugerir-artigo-topo {
+            text-align: center;
+            justify-content: center;
+        }
+
+        .form-grid-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+{#
+JavaScript desta página.
+#}
+<script>
+    // Controle do Modal de Sugestão
+    // Mostra o modal (display:flex) e trava a rolagem da página de fundo.
+    function abrirModalSugerir() {
+        const modal = document.getElementById('modalSugerir');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // Esconde o modal e libera a rolagem.
+    function fecharModalSugerir() {
+        const modal = document.getElementById('modalSugerir');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Toggle de Minhas Sugestões
+    // Abre/fecha a lista 'Minhas sugestões' e gira a setinha (rotate 180°).
+    function toggleMinhasSugestoes() {
+        const corpo = document.getElementById('listaMinhasSugestoes');
+        const icone = document.getElementById('iconeToggleSugestoes');
+
+        if (corpo) {
+            if (corpo.style.display === 'none' || corpo.style.display === '') {
+                corpo.style.display = 'block';
+                if (icone) icone.style.transform = 'rotate(180deg)';
+            } else {
+                corpo.style.display = 'none';
+                if (icone) icone.style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
+    // Paginação (3 artigos por página) + Busca instantânea integrada
+    const POR_PAGINA = 3;
+    const inputBusca = document.getElementById('busca-artigo');
+    const cardsArtigos = Array.from(document.querySelectorAll('#lista-artigos-section .artigo-card'));
+    const boxVazio = document.getElementById('artigos-vazio');
+    const navPaginacao = document.getElementById('artigos-paginacao');
+    const pagControles = document.getElementById('paginacao-controles');
+    const pagInfo = document.getElementById('paginacao-info');
+
+    const paramsUrl = new URLSearchParams(window.location.search);
+    let paginaAtual = parseInt(paramsUrl.get('page'), 10) || 1;
+
+    function irParaPagina(novaPagina, rolar = true) {
+        paginaAtual = novaPagina;
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', paginaAtual);
+        window.history.replaceState({}, '', url);
+        renderizarArtigos();
+        if (rolar) {
+            const secao = document.getElementById('lista-artigos-section');
+            if (secao) secao.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function renderizarArtigos() {
+        const termo = inputBusca ? inputBusca.value.toLowerCase().trim() : '';
+
+        // 1) Filtra os cartões que batem com a busca
+        const filtrados = cardsArtigos.filter(card => {
+            if (!termo) return true;
+            const texto = (card.dataset.busca || '') + ' ' + card.innerText.toLowerCase();
+            return texto.includes(termo);
+        });
+
+        const totalFiltrados = filtrados.length;
+        const totalPaginas = Math.max(1, Math.ceil(totalFiltrados / POR_PAGINA));
+
+        if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+        if (paginaAtual < 1) paginaAtual = 1;
+
+        const inicio = (paginaAtual - 1) * POR_PAGINA;
+        const fim = inicio + POR_PAGINA;
+        const visiveisNaPagina = filtrados.slice(inicio, fim);
+
+        // 2) Esconde todos e exibe apenas os 3 da página atual
+        cardsArtigos.forEach(card => {
+            card.style.display = 'none';
+        });
+        visiveisNaPagina.forEach(card => {
+            card.style.display = '';
+        });
+
+        // 3) Mensagem de 'nenhum artigo encontrado'
+        if (boxVazio) {
+            boxVazio.style.display = (cardsArtigos.length > 0 && totalFiltrados === 0) ? 'flex' : 'none';
+        }
+
+        // 4) Renderiza os botões de paginação
+        if (!navPaginacao || !pagControles || !pagInfo) return;
+
+        if (totalFiltrados === 0) {
+            navPaginacao.style.display = 'none';
+            return;
+        }
+
+        navPaginacao.style.display = 'flex';
+        let htmlBotoes = '';
+
+        if (paginaAtual > 1) {
+            htmlBotoes += `<button type="button" class="pag-btn pag-nav" onclick="irParaPagina(${paginaAtual - 1})">← Anterior</button>`;
+        } else {
+            htmlBotoes += `<span class="pag-btn pag-nav disabled" aria-disabled="true">← Anterior</span>`;
+        }
+
+        htmlBotoes += `<div class="pag-numeros">`;
+        for (let p = 1; p <= totalPaginas; p++) {
+            const ativo = p === paginaAtual ? 'active' : '';
+            htmlBotoes += `<button type="button" class="pag-btn pag-num ${ativo}" onclick="irParaPagina(${p})">${p}</button>`;
+        }
+        htmlBotoes += `</div>`;
+
+        if (paginaAtual < totalPaginas) {
+            htmlBotoes += `<button type="button" class="pag-btn pag-nav" onclick="irParaPagina(${paginaAtual + 1})">Próxima →</button>`;
+        } else {
+            htmlBotoes += `<span class="pag-btn pag-nav disabled" aria-disabled="true">Próxima →</span>`;
+        }
+
+        pagControles.innerHTML = htmlBotoes;
+        pagInfo.innerHTML = `Página <strong>${paginaAtual}</strong> de <strong>${totalPaginas}</strong> &bull; Exibindo ${visiveisNaPagina.length} de ${totalFiltrados} artigos aprovados`;
+    }
+
+    if (inputBusca) {
+        inputBusca.addEventListener('input', () => {
+            paginaAtual = 1;
+            renderizarArtigos();
+        });
+    }
+
+    renderizarArtigos();
+</script>
+
+{% endblock %}

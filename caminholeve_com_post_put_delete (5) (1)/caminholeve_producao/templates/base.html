@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="{{ trans.lang_code or 'pt-BR' }}">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="{{ t('site_desc') }}" />
+    <title>{{ t('site_title') }}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    {#
+       Carrega o CSS único do site (static/styles/estilo.css). url_for('static', ...) aponta para a pasta static/.
+    #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/estilo.css') }}" />
+    {#
+       ATENÇÃO: o caminho aponta para 'script/script.js', mas a pasta real se chama 'scripts' (com S) — então este
+       arquivo dá erro 404 e NÃO é carregado. Na prática, é bom: o script.js é código antigo do protótipo
+       (localStorage) e não combina com a versão Flask. Cada página tem seu próprio script embutido.
+    #}
+    <script src="{{ url_for('static', filename='script/script.js') }}"></script>
+
+    <style>
+        /* Seletor elegante de idiomas com Bandeiras */
+        .lang-switch-flags {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 0.6rem;
+            padding: 4px 8px;
+            background: rgba(106, 27, 154, 0.06);
+            border: 1px solid rgba(106, 27, 154, 0.15);
+            border-radius: 20px;
+        }
+        .lang-flag-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 4px;
+            padding: 2px;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0.55;
+            filter: grayscale(25%);
+            line-height: 0;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        .lang-flag-btn:hover {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.18);
+        }
+        .lang-flag-btn.active {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.18);
+            box-shadow: 0 0 0 2px #6a1b9a, 0 4px 10px rgba(106, 27, 154, 0.35);
+            background: #ffffff;
+        }
+        .lang-flag-svg {
+            display: block;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            width: 27px;
+            height: 19px;
+            pointer-events: none;
+        }
+
+        /* Oculta barras e frames padrão do Google Translate para manter o site 100% limpo */
+        .goog-te-banner-frame,
+        .goog-te-banner-frame.skiptranslate,
+        #goog-gt-tt,
+        .goog-te-balloon-frame {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        body {
+            top: 0px !important;
+            position: static !important;
+        }
+        .goog-text-highlight {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        #google_translate_element {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    {#
+       CABEÇALHO: logo e título do site (e a onda SVG decorativa embaixo).
+    #}
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="header-logo">
+                <span class="logo-icon">🫶</span>
+                <div class="logo-text">
+                    <h1>Caminho Leve MC</h1>
+                    <p class="header-subtitle">{{ t('header_subtitle') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-wave">
+            <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#f8f4fc" />
+            </svg>
+        </div>
+    </header>
+
+    <!-- NAV -->
+    {#
+       MENU DE NAVEGAÇÃO fixo no topo. Os links usam url_for(...) com o nome da função de cada rota do app.py.
+    #}
+    <nav class="site-nav" id="site-nav">
+        <div class="nav-inner">
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="nav-links">
+
+                <li><a href="{{ url_for('principal') }}" class="nav-link">{{ t('nav_principal') }}</a></li>
+                <li><a href="{{ url_for('minhahistoria') }}" class="nav-link">{{ t('nav_minhahistoria') }}</a></li>
+                <li><a href="{{ url_for('artigos') }}" class="nav-link">{{ t('nav_artigos') }}</a></li>
+                <li><a href="{{ url_for('acolhimento') }}" class="nav-link">{{ t('nav_acolhimento') }}</a></li>
+                <li><a href="{{ url_for('referencia') }}" class="nav-link">{{ t('nav_referencia') }}</a></li>
+                {#
+                   MENU DINÂMICO conforme o login (session vem do Flask e fica disponível em todos os templates):
+                     logado     -> mostra 'Meu Perfil', 'Olá, <primeiro nome>' e 'Sair'  (+ 'Painel ADM' se for administrador)
+                     visitante  -> mostra apenas 'Cadastro/ Login'
+                #}
+                {% if session.get('usuario_nome') %}
+                {% if session.get('usuario_tipo') == 'ADM' %}
+                <li><a href="{{ url_for('admin_painel') }}" class="nav-link" style="color: var(--purple-dark); font-weight: 700; background: rgba(106, 27, 154, 0.08); border-radius: 20px; padding: 0.35rem 0.8rem;">{{ t('nav_admin') }}</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('perfil') }}" class="nav-link" title="Meu Perfil e Configurações">{{ t('nav_perfil') }}</a></li>
+                <li><span class="nav-user-greeting nav-login">{{ t('nav_ola') }}, {{ session['usuario_nome'].split(' ')[0] }} 🫶
+                        <a href="{{ url_for('logout') }}" class="nav-link nav-login">{{ t('nav_sair') }}</a></span>
+                </li>
+                {% else %}
+                <li><a href="{{ url_for('cadastro') }}" class="nav-link nav-login">{{ t('nav_login') }}</a></li>
+                {% endif %}
+
+                <!-- Seletor de Idiomas (Bandeiras) -->
+                <li class="nav-lang-item">
+                    <div class="lang-switch-flags">
+                        <!-- Brasil (Português) -->
+                        <button type="button" onclick="mudarIdiomaGlobal('pt')" class="lang-flag-btn" data-lang="pt" title="Português" aria-label="Português">
+                            <svg class="lang-flag-svg" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="24" rx="3" fill="#009c3b"/>
+                                <polygon points="16,3.5 29,12 16,20.5 3,12" fill="#ffdf00"/>
+                                <circle cx="16" cy="12" r="5" fill="#002776"/>
+                                <path d="M 11.2,10.8 Q 16.5,9.8 20.8,13.4" fill="none" stroke="#ffffff" stroke-width="0.9" stroke-linecap="butt"/>
+                            </svg>
+                        </button>
+                        <!-- Espanha (Español) -->
+                        <button type="button" onclick="mudarIdiomaGlobal('es')" class="lang-flag-btn" data-lang="es" title="Español" aria-label="Español">
+                            <svg class="lang-flag-svg" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="24" rx="3" fill="#c60b1e"/>
+                                <rect y="6" width="32" height="12" fill="#ffc400"/>
+                                <rect x="6.5" y="9.5" width="4.5" height="5.5" rx="1" fill="#c60b1e"/>
+                                <path d="M 6.5,12 Q 8.75,15.5 11,12 Z" fill="#c60b1e"/>
+                                <circle cx="8.75" cy="8.2" r="1.1" fill="#c60b1e"/>
+                            </svg>
+                        </button>
+                        <!-- Estados Unidos (English) -->
+                        <button type="button" onclick="mudarIdiomaGlobal('en')" class="lang-flag-btn" data-lang="en" title="English" aria-label="English">
+                            <svg class="lang-flag-svg" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="24" rx="3" fill="#ffffff"/>
+                                <line x1="0" y1="2" x2="32" y2="2" stroke="#b22234" stroke-width="2"/>
+                                <line x1="0" y1="5.7" x2="32" y2="5.7" stroke="#b22234" stroke-width="2"/>
+                                <line x1="0" y1="9.4" x2="32" y2="9.4" stroke="#b22234" stroke-width="2"/>
+                                <line x1="0" y1="13.1" x2="32" y2="13.1" stroke="#b22234" stroke-width="2"/>
+                                <line x1="0" y1="16.8" x2="32" y2="16.8" stroke="#b22234" stroke-width="2"/>
+                                <line x1="0" y1="20.5" x2="32" y2="20.5" stroke="#b22234" stroke-width="2"/>
+                                <rect width="14" height="11.5" rx="2" fill="#3c3b6e"/>
+                                <circle cx="3.5" cy="3" r="0.8" fill="#ffffff"/>
+                                <circle cx="7" cy="3" r="0.8" fill="#ffffff"/>
+                                <circle cx="10.5" cy="3" r="0.8" fill="#ffffff"/>
+                                <circle cx="5.25" cy="5.8" r="0.8" fill="#ffffff"/>
+                                <circle cx="8.75" cy="5.8" r="0.8" fill="#ffffff"/>
+                                <circle cx="3.5" cy="8.6" r="0.8" fill="#ffffff"/>
+                                <circle cx="7" cy="8.6" r="0.8" fill="#ffffff"/>
+                                <circle cx="10.5" cy="8.6" r="0.8" fill="#ffffff"/>
+                            </svg>
+                        </button>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="site-main">
+        <!-- Mensagens Flash -->
+        {#
+           MENSAGENS FLASH: tudo que os Controllers enviaram com flash("texto", "success"/"error") aparece aqui.
+           'category' vira uma classe CSS (verde para success, vermelho para error). Cada mensagem aparece uma vez só.
+        #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}" style="max-width: 600px; margin: 0 auto 1.5rem;">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {#
+           AQUI entra o conteúdo específico de cada página filha (é o 'buraco' do layout).
+        #}
+        {% block conteudo %}
+        {% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    {#
+       RODAPÉ com créditos e aviso de que o site não substitui orientação médica.
+    #}
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p class="footer-brand">{{ t('footer_brand') }}</p>
+            <p class="footer-copy">{{ t('footer_copy')|safe }} <strong>Emanuelly Arantes de Oliveira</strong>
+            </p>
+            <p class="footer-note">{{ t('footer_note') }}</p>
+        </div>
+    </footer>
+
+    {#
+       JS do layout: (1) abre/fecha o menu hambúrguer no celular; (2) adiciona sombra no menu quando a página rola.
+    #}
+    <script>
+        // Mobile hamburger menu toggle
+        const hamburger = document.getElementById('nav-hamburger');
+        const navLinks = document.getElementById('nav-links');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+            hamburger.classList.toggle('active');
+        });
+
+        // Sticky nav shadow on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('site-nav');
+            nav.classList.toggle('scrolled', window.scrollY > 10);
+        });
+    </script>
+
+    <!-- TRADUTOR GLOBAL (Opção A: traduz 100% dos HTMLs e dados do banco no iPhone, Android e Desktop) -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'pt',
+                includedLanguages: 'pt,es,en',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        // Função universal para alternar idiomas (funciona em iPhone Safari, Android Chrome e PC)
+        function mudarIdiomaGlobal(lang) {
+            const host = window.location.hostname;
+            const isPt = (lang === 'pt');
+            
+            // Define cookie googtrans para todos os escopos para persistir entre páginas e recarregamentos
+            const domainCandidates = ['', host, '.' + host];
+            if (host.includes('.')) {
+                const parts = host.split('.');
+                if (parts.length > 2) {
+                    domainCandidates.push('.' + parts.slice(-2).join('.'));
+                }
+            }
+
+            domainCandidates.forEach(dom => {
+                const domAttr = dom ? '; domain=' + dom : '';
+                if (isPt) {
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/' + domAttr;
+                    document.cookie = 'googtrans=/pt/pt; path=/' + domAttr;
+                } else {
+                    document.cookie = 'googtrans=/pt/' + lang + '; path=/' + domAttr;
+                }
+            });
+
+            // Sincroniza também a sessão do Flask no backend
+            fetch('/mudar-idioma/' + lang).catch(() => {});
+
+            // Dispara a tradução dinâmica do Google Translate no DOM
+            const combo = document.querySelector('.goog-te-combo');
+            if (combo) {
+                combo.value = isPt ? 'pt' : lang;
+                combo.dispatchEvent(new Event('change'));
+            } else {
+                // Se a API ainda estiver carregando, recarrega para aplicar com o cookie já configurado
+                window.location.reload();
+            }
+
+            destacarBandeiraAtiva(lang);
+        }
+
+        function destacarBandeiraAtiva(lang) {
+            document.querySelectorAll('.lang-flag-btn').forEach(btn => {
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function obterIdiomaAtual() {
+            const match = document.cookie.match(/(?:^|;\s*)googtrans=([^;]*)/);
+            if (match && match[1]) {
+                const val = decodeURIComponent(match[1]);
+                const parts = val.split('/');
+                const l = parts[parts.length - 1];
+                if (['pt', 'es', 'en'].includes(l)) return l;
+            }
+            return '{{ current_lang or "pt" }}';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            destacarBandeiraAtiva(obterIdiomaAtual());
+        });
+    </script>
+
+</body>
+
+</html>

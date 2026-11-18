@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{#
+   recuperar_senha_perguntas.html — PASSO 2 DE 3: perguntas de segurança
+   Variáveis: email, perguntas (lista de dicionários montada no UsuarioService.obter_perguntas_seguranca)
+   e tentativas_restantes. O {% for p in perguntas %} desenha um campo para cada pergunta,
+   escolhendo o tipo de input (texto, data ou número) conforme p.tipo_input.
+#}
+{% block conteudo %}
+<div class="recuperar-wrapper">
+    <div class="recuperar-card perguntas-card">
+        <div class="recuperar-header">
+            <span class="recuperar-icon">🛡️</span>
+            <h2>Perguntas de Segurança</h2>
+            <p>Confirme os dados cadastrados para a conta <strong>{{ email }}</strong>.</p>
+        </div>
+
+        <!-- Indicador de Tentativas Restantes -->
+        <div class="status-tentativas-bar {% if tentativas_restantes == 1 %}alerta-critico{% elif tentativas_restantes == 2 %}alerta-medio{% else %}alerta-ok{% endif %}">
+            <span class="icone-tentativa">⚠️</span>
+            <div>
+                <strong>{{ tentativas_restantes }} de 3 tentativa{{ 's' if tentativas_restantes > 1 else '' }} restante{{ 's' if tentativas_restantes > 1 else '' }}</strong>
+                <p>Se errar 3 vezes, sua conta será <strong>bloqueada</strong> e você deverá solicitar o desbloqueio ao Administrador.</p>
+            </div>
+        </div>
+
+        <form action="{{ url_for('recuperar_senha_perguntas') }}" method="POST" class="recuperar-form">
+            {% for p in perguntas %}
+            <div class="form-group-recup">
+                <label for="campo_{{ p.campo }}">{{ p.titulo }} <span class="required">*</span></label>
+                {% if p.tipo_input == 'date' %}
+                <input type="date" id="campo_{{ p.campo }}" name="{{ p.campo }}" required class="input-recup">
+                {% elif p.tipo_input == 'number' %}
+                <input type="number" id="campo_{{ p.campo }}" name="{{ p.campo }}" required placeholder="{{ p.placeholder }}" class="input-recup">
+                {% else %}
+                <input type="text" id="campo_{{ p.campo }}" name="{{ p.campo }}" required placeholder="{{ p.placeholder }}" class="input-recup">
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-recuperar-proximo">
+                Verificar Respostas e Redefinir Senha →
+            </button>
+
+            <div class="recuperar-footer">
+                <a href="{{ url_for('recuperar_senha') }}" class="link-voltar">← Informar outro e-mail</a> &bull;
+                <a href="{{ url_for('cadastro') }}" class="link-voltar">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{#
+   CSS exclusivo da página.
+#}
+<style>
+.recuperar-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1.5rem 5rem;
+    min-height: calc(100vh - 250px);
+}
+
+.recuperar-card.perguntas-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(106, 27, 154, 0.09);
+    max-width: 580px;
+    width: 100%;
+    padding: 2.5rem 2.2rem;
+    position: relative;
+}
+
+.recuperar-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.recuperar-icon {
+    font-size: 2.4rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.recuperar-header h2 {
+    color: var(--purple-dark);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.recuperar-header p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin: 0;
+}
+
+.status-tentativas-bar {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    border-left: 5px solid transparent;
+}
+
+.status-tentativas-bar .icone-tentativa {
+    font-size: 1.3rem;
+    line-height: 1.2;
+}
+
+.status-tentativas-bar strong {
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.status-tentativas-bar p {
+    font-size: 0.82rem;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.status-tentativas-bar.alerta-ok {
+    background: #fff8e1;
+    border-left-color: #ffb300;
+    color: #e65100;
+}
+
+.status-tentativas-bar.alerta-medio {
+    background: #fff3e0;
+    border-left-color: #f57c00;
+    color: #bf360c;
+}
+
+.status-tentativas-bar.alerta-critico {
+    background: #ffebee;
+    border-left-color: #d32f2f;
+    color: #b71c1c;
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.recuperar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.form-group-recup {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-recup label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.35rem;
+}
+
+.form-group-recup label .required {
+    color: #e53935;
+}
+
+.input-recup {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1c4e9;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+    background: #fdfcff;
+}
+
+.input-recup:focus {
+    border-color: var(--purple-main);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+    background: #fff;
+}
+
+.btn-recuperar-proximo {
+    background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-mid) 100%);
+    color: #fff;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(106, 27, 154, 0.25);
+    transition: var(--transition);
+    margin-top: 0.6rem;
+}
+
+.btn-recuperar-proximo:hover {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 27, 154, 0.35);
+}
+
+.recuperar-footer {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+}
+
+.link-voltar {
+    color: var(--purple-main);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.link-voltar:hover {
+    text-decoration: underline;
+    color: var(--purple-dark);
+}
+</style>
+{% endblock %}

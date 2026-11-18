@@ -1,0 +1,616 @@
+
+{% extends "base.html" %}
+
+{#
+   acolhimento.html — PÁGINA DE ACOLHIMENTO (FÓRUM + RELATOS)
+   Variáveis recebidas do ForumController.exibir_acolhimento():
+     posts   -> lista de objetos Forum (cada um já com suas respostas dentro)
+     relatos -> lista de objetos Relato
+   Duas abas na mesma página: Fórum (conversa em tópicos, com respostas) e Relatos (histórias pessoais).
+   Quase toda interação (publicar, curtir, denunciar) é uma chamada ao servidor: formulário POST ou link.
+#}
+{% block conteudo %}
+
+{#
+   Topo da página.
+#}
+<!-- HERO -->
+<section class="acolhimento-hero">
+    <div class="acolhimento-hero-content">
+        <div class="hero-badge">🤝 Comunidade & Apoio</div>
+        <h2 class="hero-title">Acolhimento</h2>
+        <p class="hero-desc">
+            Um espaço seguro para <strong>trocar experiências</strong>, fazer perguntas
+            e encontrar pessoas que entendem o que você vive. Aqui, ninguém caminha sozinho.
+        </p>
+        <div class="hero-tags">
+            <span class="tag">💬 Fórum</span>
+            <span class="tag">📖 Relatos</span>
+            <span class="tag">💜 Empatia</span>
+        </div>
+    </div>
+    <div class="acolhimento-hero-deco">
+        <div class="deco-circle c1">💬</div>
+        <div class="deco-circle c2">🌸</div>
+        <div class="deco-circle c3">💜</div>
+    </div>
+</section>
+
+{#
+   Texto explicando o propósito do acolhimento (conteúdo fixo).
+#}
+<!-- INFORMAÇÕES GERAIS SOBRE O ACOLHIMENTO -->
+<section class="acolhimento-info" style="background: white; border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+    <h3 style="color: var(--purple-main); margin-top: 0;">
+        💜 Um espaço de apoio e conexão
+    </h3>
+
+    <p style="line-height: 1.8; color: var(--text-body);">
+        O Acolhimento é o espaço do Caminho Leve MC dedicado à troca de experiências,
+        ao apoio mútuo e ao fortalecimento de vínculos entre pessoas que convivem,
+        de perto ou de longe, com a Miastenia Congênita. Portadores, familiares,
+        amigos e profissionais da saúde podem encontrar aqui oportunidades de
+        interação e compartilhamento de informações, em um ambiente pensado para
+        reduzir o isolamento que pode acompanhar a vivência de uma doença rara.
+    </p>
+
+    <p style="line-height: 1.8; color: var(--text-body);">
+        A página é dividida em duas áreas complementares: o <strong>Fórum</strong>,
+        voltado à troca de dúvidas e experiências entre os usuários, e os
+        <strong>Relatos</strong>, destinados às histórias pessoais de quem vive
+        essa realidade.
+    </p>
+
+    <p style="line-height: 1.8; color: var(--text-body); margin-bottom: 0;">
+        Para participar, é necessário ter cadastro na plataforma. As informações
+        de perfil ajudam a contextualizar as interações, enquanto os participantes
+        devem respeitar a privacidade uns dos outros. As publicações ficam
+        disponíveis após o envio, sem aprovação prévia. Quando um conteúdo é
+        denunciado, a equipe responsável analisa a situação e pode remover a
+        publicação, caso necessário, para contribuir com um ambiente respeitoso
+        e alinhado às diretrizes de uso e à proteção de dados pessoais.
+    </p>
+</section>
+
+{#
+   Botões Fórum/Relatos. onclick chama mudarAba() (JS no fim). A aba inicial pode vir da URL (?tab=relatos).
+#}
+<!-- ABAS -->
+<div class="abas-wrapper">
+    <div class="abas" id="abas">
+        <button class="aba-btn ativa" id="btn-forum" onclick="mudarAba('forum')">
+            <span class="aba-icon">💬</span> Fórum
+        </button>
+        <button class="aba-btn" id="btn-relatos" onclick="mudarAba('relatos')">
+            <span class="aba-icon">📖</span> Relatos
+        </button>
+    </div>
+</div>
+
+{#
+   ABA FÓRUM (id secForum).
+#}
+<!-- ==================== FÓRUM ==================== -->
+<section class="aba-secao" id="secForum">
+
+    <!-- APRESENTAÇÃO DO FÓRUM -->
+    <div class="acolhimento-info" style="background: white; border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+        <h3 style="color: var(--purple-main); margin-top: 0;">
+            💬 Sobre o Fórum
+        </h3>
+
+        <p style="line-height: 1.8; color: var(--text-body);">
+            O Fórum é o espaço de conversa e troca de dúvidas do Caminho Leve MC.
+            Seu objetivo é conectar pessoas que compartilham vivências parecidas:
+            portadores que buscam compreender melhor suas experiências, familiares
+            com dúvidas sobre o dia a dia da condição e profissionais da saúde
+            interessados em contribuir com informações.
+        </p>
+
+        <p style="line-height: 1.8; color: var(--text-body);">
+            A proposta é que ninguém precise buscar respostas sozinho, principalmente
+            diante de uma doença rara e pouco discutida. Os participantes podem
+            publicar mensagens, responder às contribuições de outras pessoas e
+            interagir por meio das ferramentas disponíveis na plataforma.
+        </p>
+
+        <p style="line-height: 1.8; color: var(--text-body);">
+            As mensagens são publicadas diretamente pelos usuários, sem aprovação
+            prévia. Caso você encontre um conteúdo inadequado, poderá denunciá-lo
+            utilizando a opção correspondente. A equipe responsável analisará a
+            denúncia e poderá remover a publicação quando necessário.
+        </p>
+
+        <p style="line-height: 1.8; color: var(--text-body); margin-bottom: 0;">
+            <strong>🤝 Lembre-se:</strong> mantenha o respeito, evite julgamentos,
+            proteja as informações pessoais e lembre-se de que as experiências
+            individuais não substituem a orientação de profissionais da saúde.
+        </p>
+    </div>
+
+    <!-- AVISO DE LOGIN -->
+    {% if not session.get('usuario_email') %}
+    <div class="aviso-login" id="aviso-login-forum" style="display: flex;">
+        <span>🔒</span>
+        <p>Faça <a href="{{ url_for('cadastro') }}">login ou cadastre-se</a> para participar do fórum.</p>
+    </div>
+    {% else %}
+
+    <!-- FORMULÁRIO DE NOVA MENSAGEM -->
+    {#
+       Formulário de nova mensagem -> POST /forum/post/novo. O campo name="texto" é lido no Controller.
+    #}
+    <form action="{{ url_for('forum_post_novo') }}" method="POST" class="form-publicar" id="form-forum-wrap">
+        <div class="form-publicar-header">
+            <div class="form-avatar" style="background: linear-gradient(135deg, var(--purple-main), var(--purple-light)); font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;">
+                {{ session['usuario_nome'][0] | upper }}
+            </div>
+            <span class="form-usuario">{{ session['usuario_nome'] }}</span>
+        </div>
+
+        <textarea name="texto" id="input-forum" class="form-textarea" placeholder="Escreva sua mensagem para a comunidade..." rows="3" required></textarea>
+
+        <div class="form-publicar-footer">
+            <span class="form-dica">✨ Seja gentil e respeitoso com todos</span>
+            <button type="submit" class="btn-publicar">Publicar <span>→</span></button>
+        </div>
+    </form>
+    {% endif %}
+
+    <!-- LISTA DE MENSAGENS -->
+    <div class="mensagens-lista" id="lista-forum">
+        {% if posts %}
+            {% for post in posts %}
+            {#
+               CARTÃO DE UM POST. Clicar nele abre/fecha a discussão (toggleDiscussao). data-post-id guarda o id.
+            #}
+            <article class="mensagem-card" onclick="toggleDiscussao(this, event)" data-post-id="{{ post.get_id() }}">
+                <div class="mensagem-header">
+                    <div class="mensagem-avatar" style="background: linear-gradient(135deg,#ab47bc,#ce93d8);">
+                        {{ post.get_autor_nome()[0] | upper }}
+                    </div>
+
+                    <div class="mensagem-meta" style="flex: 1;">
+                        <span class="mensagem-autor">{{ post.get_autor_nome() }}</span>
+                        <span class="mensagem-data">{{ post.get_criado_em().strftime('%d/%m/%Y %H:%M') }}</span>
+
+                        {% if post.get_denuncia() >= 3 and session.get('usuario_email') == post.get_autor_id() %}
+                            <span style="display: inline-block; font-size: 0.73rem; color: #a58f8f; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; padding: 1px 6px; margin-left: 0.5rem; font-weight: 600;">
+                                ⚠️ Oculto para os demais usuários ({{ post.get_denuncia() }} denúncias)
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% set total_respostas = post.get_respostas() | length %}
+                    <button class="btn-ver-discussao" data-count="{{ total_respostas }}" {% if total_respostas > 0 %}onclick="event.stopPropagation(); toggleDiscussao(this.closest('.mensagem-card'), event);"{% else %}disabled{% endif %}>
+                        💬 Ver Discussão ({{ total_respostas }})
+                    </button>
+                </div>
+
+                <p class="mensagem-texto">
+                    {{ post.get_texto() }}
+                </p>
+
+                {#
+                   Ações do post:
+                     Curtir    -> LINK <a href> para /forum/post/curtir/<id> (por isso a rota aceita GET)
+                     Responder -> botão que abre o campo de resposta (JS)
+                     Denunciar -> link com confirm() do navegador; não aparece para o próprio autor
+                #}
+                <div class="mensagem-acoes" onclick="event.stopPropagation();">
+                    {% if session.get('usuario_email') %}
+                        <a href="{{ url_for('forum_post_curtir', forum_id=post.get_id()) }}" class="btn-like {% if post.get_curtido_pelo_usuario() %}liked{% endif %}" style="text-decoration: none;">
+                            <span class="like-icon">{% if post.get_curtido_pelo_usuario() %}💜{% else %}🤍{% endif %}</span>
+                            <span class="like-count">{{ post.get_likes() }}</span> curtidas
+                        </a>
+
+                        <button class="btn-responder" onclick="abrirEFocusResposta(this, event)">💬 Responder</button>
+
+                        {% if session.get('usuario_email') != post.get_autor_id() %}
+                            <a href="{{ url_for('forum_post_denunciar', forum_id=post.get_id()) }}" class="btn-denunciar" title="Denunciar questão do fórum" style="text-decoration: none;" onclick="return confirm('Tem certeza que deseja denunciar esta questão do fórum?');">
+                                ⚠️ Denunciar
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <span class="btn-like" style="cursor: not-allowed; opacity: 0.7;">
+                            <span class="like-icon">🤍</span>
+                            <span class="like-count">{{ post.get_likes() }}</span> curtidas
+                        </span>
+                    {% endif %}
+                </div>
+
+                {#
+                   Área recolhível com as respostas daquele post (post.get_respostas()).
+                #}
+                <!-- RESPOSTAS -->
+                <div class="respostas-container-transicao" onclick="event.stopPropagation();">
+                    <div class="respostas">
+                        {% for resposta in post.get_respostas() %}
+                        <article class="resposta-card" id="resposta-{{ resposta.get_id() }}">
+                            <div class="mensagem-avatar small" style="background: linear-gradient(135deg,#6a1b9a,#ab47bc);">
+                                {{ resposta.get_autor_nome()[0] | upper }}
+                            </div>
+
+                            <div class="resposta-conteudo" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <div>
+                                        <span class="mensagem-autor" style="font-size: 0.88rem; font-weight: 700;">{{ resposta.get_autor_nome() }}</span>
+                                        <span class="mensagem-data" style="font-size: 0.75rem; color: var(--cor-texto-suave); margin-left: 0.4rem;">{{ resposta.get_criado_em().strftime('%d/%m/%Y %H:%M') }}</span>
+                                    </div>
+
+                                    {% if session.get('usuario_email') %}
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <a href="{{ url_for('forum_resposta_curtir', resposta_id=resposta.get_id()) }}" class="btn-like-small {% if resposta.get_curtido_pelo_usuario() %}liked{% endif %}" title="Curtir resposta" style="text-decoration: none;">
+                                            <span class="like-icon">{% if resposta.get_curtido_pelo_usuario() %}💜{% else %}🤍{% endif %}</span>
+                                            <span class="like-count">{{ resposta.get_likes() }}</span>
+                                        </a>
+
+                                        {% if session.get('usuario_email') != resposta.get_autor_email() %}
+                                        <a href="{{ url_for('forum_resposta_denunciar', resposta_id=resposta.get_id()) }}" class="btn-denunciar" title="Denunciar resposta" style="text-decoration: none;" onclick="return confirm('Tem certeza que deseja denunciar esta resposta?');">
+                                            ⚠️ Denunciar
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                        <span style="font-size: 0.8rem; color: var(--cor-texto-suave);">
+                                            🤍 {{ resposta.get_likes() }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <p style="margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--text-body);">
+                                    {{ resposta.get_texto() }}
+                                </p>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    {% if session.get('usuario_email') %}
+                    {#
+                       Formulário de resposta -> POST /forum/resposta/nova. O campo oculto forum_id diz a qual post pertence.
+                    #}
+                    <form action="{{ url_for('forum_resposta_nova') }}" method="POST" class="form-resposta-wrap" style="margin-top: 1.2rem;">
+                        <input type="hidden" name="forum_id" value="{{ post.get_id() }}">
+
+                        <textarea name="texto" class="form-textarea small" placeholder="Escreva uma resposta..." rows="2" required style="width: 100%; margin-bottom: 0.5rem;"></textarea>
+
+                        <button type="submit" class="btn-publicar small" style="margin-top: 0;">Responder →</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="artigos-vazio" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; text-align: center; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); margin-top: 1.5rem;">
+                <span style="font-size: 3rem; margin-bottom: 1rem;">💬</span>
+                <p style="color: var(--cor-texto-suave); font-weight: 500;">
+                    Nenhuma publicação ainda. Seja o primeiro a participar do fórum!
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{#
+   ABA RELATOS (id secRelatos): mesma ideia do fórum, sem respostas.
+#}
+<!-- ==================== RELATOS ==================== -->
+<section class="aba-secao" id="secRelatos" style="display:none;">
+
+    <!-- APRESENTAÇÃO DOS RELATOS -->
+    <div class="acolhimento-info" style="background: white; border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+        <h3 style="color: var(--purple-main); margin-top: 0;">
+            📖 Histórias que acolhem
+        </h3>
+
+        <p style="line-height: 1.8; color: var(--text-body);">
+            Os Relatos são o espaço destinado às histórias pessoais de quem convive
+            com a Miastenia Congênita. Portadores e familiares podem compartilhar
+            suas trajetórias, desde os primeiros sinais e o processo de diagnóstico
+            até os desafios, aprendizados e conquistas do dia a dia.
+        </p>
+
+        <p style="line-height: 1.8; color: var(--text-body);">
+            Cada história pode ajudar outras pessoas que estejam passando por
+            experiências semelhantes, oferecendo identificação, acolhimento e a
+            sensação de que não precisam enfrentar essa caminhada sozinhas.
+        </p>
+
+        <p style="line-height: 1.8; color: var(--text-body);">
+            Assim como no Fórum, os relatos são publicados diretamente pelo usuário,
+            sem moderação prévia. Caso uma publicação seja denunciada por não estar
+            de acordo com as diretrizes da plataforma, a equipe responsável avaliará
+            a denúncia e poderá retirar o conteúdo do ar, se necessário.
+        </p>
+
+        <p style="line-height: 1.8; color: var(--text-body); margin-bottom: 0;">
+            <strong>💜 Compartilhe no seu tempo:</strong> você não precisa contar
+            nada que não queira. Evite incluir dados pessoais ou informações
+            privadas de outras pessoas. Sua história merece ser acolhida com respeito.
+        </p>
+    </div>
+
+    <!-- AVISO DE LOGIN -->
+    {% if not session.get('usuario_email') %}
+    <div class="aviso-login" id="aviso-login-relato" style="display: flex;">
+        <span>🔒</span>
+        <p>Faça <a href="{{ url_for('cadastro') }}">login ou cadastre-se</a> para compartilhar seu relato.</p>
+    </div>
+    {% else %}
+
+    <!-- FORMULÁRIO DE NOVO RELATO -->
+    {#
+       Formulário de novo relato -> POST /relato/novo.
+    #}
+    <form action="{{ url_for('relato_novo') }}" method="POST" class="form-publicar" id="form-relato-wrap" style="display: block;">
+        <div class="form-publicar-header">
+            <div class="form-avatar" style="background: linear-gradient(135deg, var(--purple-main), var(--purple-light)); font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;">
+                {{ session['usuario_nome'][0] | upper }}
+            </div>
+
+            <span class="form-usuario">
+                Compartilhe sua história, {{ session['usuario_nome'].split(' ')[0] }}
+            </span>
+        </div>
+
+        <textarea name="texto" id="input-relato" class="form-textarea" placeholder="Conte sua experiência com a Miastenia Congênita... Sua história pode ajudar muitas outras pessoas." rows="4" required></textarea>
+
+        <div class="form-publicar-footer">
+            <span class="form-dica">📖 Relatos não têm respostas — é um espaço de expressão livre</span>
+            <button type="submit" class="btn-publicar">Publicar Relato <span>→</span></button>
+        </div>
+    </form>
+    {% endif %}
+
+    <!-- LISTA DE RELATOS -->
+    <div class="relatos-lista" id="lista-relatos">
+        {% if relatos %}
+            {% for relato in relatos %}
+            <article class="relato-card" id="relato-{{ relato.get_id() }}">
+                <div class="relato-header">
+                    <div class="relato-avatar" style="background: linear-gradient(135deg,#6a1b9a,#ab47bc);">
+                        {{ relato.get_autor_nome()[0] | upper }}
+                    </div>
+
+                    <div class="relato-meta" style="flex: 1;">
+                        <span class="relato-autor">{{ relato.get_autor_nome() }}</span>
+                        <span class="relato-data">{{ relato.get_criado_em().strftime('%d/%m/%Y %H:%M') if relato.get_criado_em() else '' }}</span>
+
+                        {% if relato.get_denuncia() >= 3 and session.get('usuario_email') == relato.get_autor_email() %}
+                            <span style="display: inline-block; font-size: 0.73rem; color: #d32f2f; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; padding: 1px 6px; margin-left: 0.5rem; font-weight: 600;">
+                                ⚠️ Oculto para os demais usuários ({{ relato.get_denuncia() }} denúncias)
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="relato-badge">📖 Relato</div>
+                </div>
+
+                <div class="relato-corpo">
+                    <p class="relato-texto">
+                        {{ relato.get_texto() }}
+                    </p>
+                </div>
+
+                <div class="relato-rodape" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    {% if session.get('usuario_email') %}
+                        <a href="{{ url_for('relato_curtir', relato_id=relato.get_id()) }}" class="btn-like {% if relato.get_curtido_pelo_usuario() %}liked{% endif %}" style="text-decoration: none;">
+                            <span class="like-icon">{% if relato.get_curtido_pelo_usuario() %}💜{% else %}🤍{% endif %}</span>
+                            <span class="like-count">{{ relato.get_likes() }}</span> pessoas se identificaram
+                        </a>
+
+                        {% if session.get('usuario_email') != relato.get_autor_email() %}
+                            <a href="{{ url_for('relato_denunciar', relato_id=relato.get_id()) }}" class="btn-denunciar" title="Denunciar relato" style="text-decoration: none;" onclick="return confirm('Tem certeza que deseja denunciar este relato?');">
+                                ⚠️ Denunciar
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <span class="btn-like" style="cursor: not-allowed; opacity: 0.7;">
+                            <span class="like-icon">🤍</span>
+                            <span class="like-count">{{ relato.get_likes() }}</span> pessoas se identificaram
+                        </span>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="artigos-vazio" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; text-align: center; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); margin-top: 1.5rem;">
+                <span style="font-size: 3rem; margin-bottom: 1rem;">📖</span>
+                <p style="color: var(--cor-texto-suave); font-weight: 500;">
+                    Nenhum relato ainda. Seja o primeiro a compartilhar sua história!
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{#
+   JavaScript desta página (só interface: abas, expandir discussão, foco no campo).
+#}
+<script>
+    // Alterna entre as abas Fórum e Relatos mostrando/escondendo as duas seções.
+    function mudarAba(aba) {
+        const secForum   = document.getElementById('secForum');
+        const secRelatos = document.getElementById('secRelatos');
+        const btnForum   = document.getElementById('btn-forum');
+        const btnRelatos = document.getElementById('btn-relatos');
+
+        if (aba === 'forum') {
+            secForum.style.display   = 'block';
+            secRelatos.style.display = 'none';
+            btnForum.classList.add('ativa');
+            btnRelatos.classList.remove('ativa');
+        } else {
+            secForum.style.display   = 'none';
+            secRelatos.style.display = 'block';
+            btnRelatos.classList.add('ativa');
+            btnForum.classList.remove('ativa');
+        }
+    }
+
+    // SOBRA DO PROTÓTIPO: alternava o coração só na tela. Hoje o curtir é um link que grava no banco, então esta função quase não é usada.
+    function toggleLike(btn) {
+        const icon  = btn.querySelector('.like-icon');
+        const count = btn.querySelector('.like-count');
+        const liked = btn.classList.toggle('liked');
+
+        icon.textContent  = liked ? '💜' : '🤍';
+        count.textContent = parseInt(count.textContent) + (liked ? 1 : -1);
+    }
+
+    // Abre/fecha a discussão de um post. Só deixa um post aberto por vez e atualiza o texto do botão ('Ver Discussão (N)' / 'Recolher'). Ignora cliques em links/botões/campos dentro do cartão.
+    function toggleDiscussao(card, event) {
+        const btn = card.querySelector('.btn-ver-discussao');
+        const count = btn ? parseInt(btn.getAttribute('data-count') || '0', 10) : 0;
+
+        if (event) {
+            const target = event.target;
+
+            if (target.closest('.btn-ver-discussao:disabled') || (btn && btn.disabled && target.closest('.btn-ver-discussao'))) {
+                return;
+            }
+
+            if (count === 0 && !card.classList.contains('ativo')) {
+                return;
+            }
+
+            if (target.closest('a') || target.closest('button') || target.closest('textarea') || target.closest('input') || target.closest('form')) {
+                if (!target.closest('.btn-ver-discussao')) {
+                    return;
+                }
+            }
+        }
+
+        const isCurrentlyActive = card.classList.contains('ativo');
+
+        if (!isCurrentlyActive) {
+            document.querySelectorAll('.mensagem-card.ativo').forEach(c => {
+                c.classList.remove('ativo');
+
+                const b = c.querySelector('.btn-ver-discussao');
+
+                if (b) {
+                    const cCount = parseInt(b.getAttribute('data-count') || '0', 10);
+                    b.textContent = `💬 Ver Discussão (${cCount})`;
+                }
+            });
+        }
+
+        const nowActive = card.classList.toggle('ativo');
+
+        if (btn) {
+            if (count > 0) {
+                if (nowActive) {
+                    btn.textContent = '💬 Recolher Discussão';
+                } else {
+                    btn.textContent = `💬 Ver Discussão (${count})`;
+                }
+            } else {
+                btn.textContent = `💬 Ver Discussão (0)`;
+            }
+        }
+    }
+
+    // Botão 'Responder': abre a discussão (se estiver fechada) e coloca o cursor no campo de resposta.
+    function abrirEFocusResposta(btn, event) {
+        if (event) event.stopPropagation();
+
+        const card = btn.closest('.mensagem-card');
+
+        if (!card.classList.contains('ativo')) {
+            toggleDiscussao(card);
+        }
+
+        const textarea = card.querySelector('.form-resposta-wrap textarea');
+
+        if (textarea) {
+            setTimeout(() => {
+                textarea.focus();
+            }, 350);
+        }
+    }
+
+    // SOBRA DO PROTÓTIPO (simulava a publicação só na tela, sem banco). Hoje quem publica de verdade é o formulário POST -> ForumController.
+    function publicarMensagem() {
+        const texto = document.getElementById('input-forum').value.trim();
+
+        if (!texto) return;
+
+        const lista = document.getElementById('lista-forum');
+        const card  = criarMensagemCard('Você', texto);
+
+        lista.insertAdjacentHTML('afterbegin', card);
+        document.getElementById('input-forum').value = '';
+
+        lista.querySelectorAll('.btn-like').forEach(b => b.onclick = () => toggleLike(b));
+        lista.querySelectorAll('.btn-responder').forEach(b => b.onclick = () => toggleResposta(b));
+    }
+
+    // SOBRA DO PROTÓTIPO (idem): publicação real é feita pelo formulário POST -> RelatoController.
+    function publicarRelato() {
+        const texto = document.getElementById('input-relato').value.trim();
+
+        if (!texto) return;
+
+        const lista = document.getElementById('lista-relatos');
+        const card  = criarRelatoCard('Você', texto);
+
+        lista.insertAdjacentHTML('afterbegin', card);
+        document.getElementById('input-relato').value = '';
+
+        lista.querySelectorAll('.btn-like').forEach(b => b.onclick = () => toggleLike(b));
+    }
+
+    // Gera o HTML de um cartão de mensagem (usado só pelo código do protótipo acima).
+    function criarMensagemCard(autor, texto) {
+        return `<article class="mensagem-card novo">
+            <div class="mensagem-header">
+                <div class="mensagem-avatar" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc);">V</div>
+                <div class="mensagem-meta">
+                    <span class="mensagem-autor">${autor}</span>
+                    <span class="mensagem-data">agora</span>
+                </div>
+            </div>
+            <p class="mensagem-texto">${texto}</p>
+            <div class="mensagem-acoes">
+                <button class="btn-like"><span class="like-icon">🤍</span> <span class="like-count">0</span> curtidas</button>
+                <button class="btn-responder">💬 Responder</button>
+            </div>
+            <div class="respostas"></div>
+            <div class="form-resposta-wrap" style="display:none;">
+                <textarea class="form-textarea small" placeholder="Escreva uma resposta..." rows="2"></textarea>
+                <button class="btn-publicar small">Responder →</button>
+            </div>
+        </article>`;
+    }
+
+    // Gera o HTML de um cartão de relato (idem).
+    function criarRelatoCard(autor, texto) {
+        return `<article class="relato-card novo">
+            <div class="relato-header">
+                <div class="relato-avatar" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc);">V</div>
+                <div class="relato-meta">
+                    <span class="relato-autor">${autor}</span>
+                    <span class="relato-data">agora</span>
+                </div>
+                <div class="relato-badge">📖 Relato</div>
+            </div>
+            <div class="relato-corpo">
+                <p class="relato-texto">${texto}</p>
+            </div>
+            <div class="relato-rodape">
+                <button class="btn-like"><span class="like-icon">🤍</span> <span class="like-count">0</span> pessoas se identificaram</button>
+            </div>
+        </article>`;
+    }
+
+    // Ao carregar a página, lê ?tab= da URL (forum ou relatos) e abre a aba certa; por padrão abre o Fórum.
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab') || 'forum';
+        mudarAba(tab);
+    });
+</script>
+
+{% endblock %}

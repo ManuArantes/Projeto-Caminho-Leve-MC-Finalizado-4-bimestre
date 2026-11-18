@@ -1,0 +1,669 @@
+{% extends "base.html" %}
+
+{#
+minhahistoria.html — PÁGINA "MINHA HISTÓRIA"
+Conteúdo estático: a história da autora e o relato da mãe, em formato de linha do tempo.
+Sem lógica Python. Estilos (.timeline-*, .historia-*) estão no estilo.css.
+#}
+{% block conteudo %}
+
+<!-- HERO -->
+<section class="historia-hero">
+    <div class="historia-hero-content">
+        <div class="hero-badge">✨ Minha Jornada</div>
+        <h2 class="hero-title">Minha História</h2>
+        <p class="hero-desc">
+            Uma vida com <strong>Síndrome Miastênica Congênita</strong> — desafios, descobertas,
+            força e muito acolhimento ao longo do caminho.
+        </p>
+        <div class="hero-tags">
+            <span class="tag">💜 Resiliência</span>
+            <span class="tag">🌱 Superação</span>
+            <span class="tag">🤝 Acolhimento</span>
+        </div>
+    </div>
+    <div class="historia-hero-img">
+        <div class="historia-avatar">
+            <span class="avatar-emoji">🌸</span>
+        </div>
+    </div>
+</section>
+
+{#
+Linha do tempo: cada <!-- CARD N --> abaixo é uma etapa da jornada (sinais, busca, diagnóstico, tratamento).
+#}
+<!-- LINHA DO TEMPO -->
+<section class="timeline-section">
+    <h2 class="section-title">Minha Jornada</h2>
+    <p class="section-subtitle">Os momentos que me moldaram e a força que encontrei ao longo do caminho.</p>
+
+    <div class="timeline">
+
+        <!-- CARD 1: INTRODUÇÃO -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Quem sou eu</span>
+                <h3>Antes de tudo, uma pessoa</h3>
+                <p>
+                    Olá! Meu nome é Emanuelly Arantes de Oliveira, tenho
+                    18 anos e convivo desde o nascimento com a Miastenia
+                    Congênita (CID-10 G70.2). Sou estudante de Informática
+                    no Instituto Federal de São Paulo, mas minha história
+                    vai muito além de um diagnóstico.
+                </p>
+                <p>
+                    Cresci aprendendo a conviver com um corpo que nem
+                    sempre responde como eu gostaria. Quando criança,
+                    não entendia por que sentia tanta fraqueza ou por que
+                    não conseguia brincar como as outras crianças por
+                    muito tempo. Hoje, compreendo melhor meus limites e
+                    quero compartilhar minha experiência para que outras
+                    pessoas se sintam menos sozinhas.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 2: PRIMEIROS SINAIS -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Desde o nascimento</span>
+                <h3>Quando meu corpo tentava dizer algo</h3>
+                <p>
+                    Nasci com 3,260 kg, mas, desde os primeiros dias,
+                    tinha dificuldades para me alimentar. O leite, em
+                    vez de seguir seu caminho normalmente, acabava indo
+                    para os meus pulmões. Com o tempo, fui perdendo peso
+                    até chegar a aproximadamente 2 kg.
+                </p>
+                <p>
+                    Inicialmente, suspeitaram de alergia ao leite ou à
+                    proteína. Aos dois meses, comecei a utilizar uma
+                    sonda pelo nariz e consegui voltar a ganhar peso.
+                    Porém, a causa das dificuldades continuava sem ser
+                    identificada.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 3: A BUSCA POR RESPOSTAS -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Os primeiros meses</span>
+                <h3>Uma resposta que demorava a chegar</h3>
+                <p>
+                    Durante muito tempo, minha mãe procurou ajuda,
+                    mas suas preocupações nem sempre foram levadas
+                    a sério. Enquanto isso, eu continuava enfrentando
+                    dificuldades para engolir e precisava da sonda
+                    para me alimentar.
+                </p>
+                <p>
+                    Aos nove meses, os médicos planejavam uma cirurgia
+                    para colocar a sonda diretamente na minha barriga.
+                    Eu estava na Unicamp havia um mês e três dias,
+                    e minha família ainda não sabia exatamente o que
+                    estava acontecendo comigo.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 4: O DIAGNÓSTICO -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Aos 9 meses</span>
+                <h3>Finalmente, um nome para o que eu vivia</h3>
+                <p>
+                    Na véspera da cirurgia, um médico que soube do meu
+                    caso foi até Campinas e suspeitou de Miastenia
+                    Congênita. A investigação mudou o rumo da minha
+                    história.
+                </p>
+                <p>
+                    Durante o teste com piridostigmina, minha resposta
+                    chamou a atenção: consegui chorar com uma força
+                    que ainda não havia demonstrado daquela maneira.
+                    Aos nove meses, recebi o diagnóstico no Centro de
+                    Neuropediatria da Unicamp.
+                </p>
+                <p>
+                    Depois de tantas dúvidas, finalmente havia uma
+                    explicação para os sinais que meu corpo apresentava
+                    desde o nascimento.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 5: TRATAMENTO E DESENVOLVIMENTO -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Depois do diagnóstico</span>
+                <h3>Pequenas conquistas, grandes mudanças</h3>
+                <p>
+                    Com o início do tratamento com Mestinon
+                    (piridostigmina), minha resposta foi significativa.
+                    Fiquei mais alerta, mais responsiva e comecei a
+                    apresentar melhora no ganho de peso.
+                </p>
+                <p>
+                    Aos poucos, com acompanhamento médico, fisioterapia
+                    e fonoaudiologia, consegui voltar a me alimentar
+                    pela boca. Por volta dos nove meses, a sonda foi
+                    retirada com orientação médica, pois minha
+                    deglutição havia melhorado.
+                </p>
+                <p>
+                    Apesar das complicações que enfrentei quando bebê,
+                    desenvolvi a fala e a caminhada sem as sequelas que
+                    minha família tanto temia.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 6: CONFIRMAÇÃO GENÉTICA -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">2021</span>
+                <h3>Conhecendo melhor minha condição</h3>
+                <p>
+                    Em 2021, um exame genético confirmou uma mutação
+                    no gene CHRNE, relacionada à minha condição.
+                    Para conseguir realizar o exame, contei com a
+                    ajuda de pessoas que também convivem com a
+                    Miastenia Congênita.
+                </p>
+                <p>
+                    Essa experiência me mostrou como a união entre
+                    pessoas que compartilham desafios semelhantes
+                    pode abrir caminhos para novas descobertas.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 7: CONVIVER COM A MIASTENIA -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Ao longo da vida</span>
+                <h3>Aprendendo a respeitar meus limites</h3>
+                <p>
+                    A Miastenia Congênita faz parte da minha rotina.
+                    O calor, infecções, gripes e até determinados
+                    períodos do mês podem intensificar a fraqueza.
+                    Em alguns dias, consigo realizar minhas atividades
+                    normalmente; em outros, preciso parar e descansar.
+                </p>
+                <p>
+                    Conciliar os cuidados com a saúde, a fisioterapia,
+                    os medicamentos e a rotina escolar nem sempre é
+                    simples. Às vezes, preciso faltar às aulas ou
+                    passar um dia inteiro em repouso para recuperar
+                    minhas forças.
+                </p>
+                <p>
+                    Aprendi que respeitar meus limites não significa
+                    desistir. Significa compreender o que meu corpo
+                    precisa para que eu possa continuar.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 8: SEGURANÇA COM MEDICAMENTOS -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Um cuidado constante</span>
+                <h3>Quando a informação pode fazer a diferença</h3>
+                <p>
+                    Um dos meus maiores desafios é a segurança no uso
+                    de medicamentos. Mesmo tendo um diagnóstico
+                    conhecido e informações médicas sobre as
+                    restrições, já passei por situações em que
+                    medicamentos contraindicados para minha condição
+                    foram prescritos.
+                </p>
+                <p>
+                    Em uma dessas situações, tive uma reação
+                    anafilática grave. Experiências assim me fizeram
+                    perceber que conhecer a própria doença não
+                    elimina todos os riscos, principalmente quando
+                    os profissionais que nos atendem não conhecem
+                    bem uma condição rara.
+                </p>
+                <p>
+                    Por isso, sempre que possível, levo as informações
+                    sobre meu diagnóstico, aviso sobre minhas
+                    restrições e procuro confirmar se um medicamento
+                    é seguro para mim.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 9: COMO LIDO COM A DOENÇA -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♡</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♥ Minha história</span>
+                <span class="timeline-ano">Hoje</span>
+                <h3>Não é sobre vencer, é sobre caminhar</h3>
+                <p>
+                    Com o tempo, aprendi a reconhecer os sinais de
+                    fraqueza e a entender quando preciso diminuir
+                    o ritmo. Hoje, faço o que está ao meu alcance
+                    e aceito que, às vezes, preciso de mais tempo
+                    para me recuperar.
+                </p>
+                <p>
+                    Tenho uma rotina, sonhos e objetivos. Nem todos
+                    os dias são iguais, e nem sempre consigo fazer
+                    tudo o que planejei. Isso não significa fracasso.
+                    É apenas parte da maneira como vivo e aprendo
+                    a cuidar de mim.
+                </p>
+            </div>
+        </div>
+
+        {#
+        Separador: a partir daqui a narrativa passa a ser contada pela MÃE.
+        #}
+        <!-- DIVISÃO DOS RELATOS -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">O olhar de uma mãe</span>
+                <h3>Uma história que também é dela</h3>
+                <p>
+                    Agora, quero compartilhar essa trajetória por
+                    outra perspectiva: a da minha mãe, Michele.
+                    Foi ela quem esteve ao meu lado desde os
+                    primeiros dias, quem percebeu que algo estava
+                    errado e quem continuou procurando respostas
+                    mesmo quando suas preocupações não eram ouvidas.
+                </p>
+                <p>
+                    O que vem a seguir é o relato dela, contado
+                    em primeira pessoa, sobre os acontecimentos,
+                    os medos e a busca pelo diagnóstico da filha.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 10: RELATO DA MÃE - NASCIMENTO -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Nascimento e primeiros dias</span>
+                <h3>Quando comecei a perceber os sinais</h3>
+                <p>
+                    Eu sou Michele, mãe da Emanuelly. Minha filha
+                    nasceu de cesariana, com 38 semanas e pesando
+                    3,260 kg. Ela nasceu um pouco cansada e não foi
+                    imediatamente para o quarto comigo.
+                </p>
+                <p>
+                    Durante a permanência no hospital, lembro que,
+                    em alguns momentos, parecia que ela
+                    “gargarejava” o leite que recebia no copinho.
+                    Naquele momento, eu ainda não sabia o que
+                    aquilo poderia significar.
+                </p>
+                <p>
+                    Em casa, durante o primeiro mês, ela mamou
+                    exclusivamente no peito, mas não ganhava peso.
+                    Depois da orientação para complementar a
+                    alimentação com fórmula, começaram os vômitos
+                    frequentes.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 11: A BUSCA DA MÃE -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Os primeiros meses</span>
+                <h3>Eu sabia que havia algo errado</h3>
+                <p>
+                    Foram muitas tentativas de encontrar uma fórmula
+                    que ela tolerasse e medicamentos para tentar
+                    controlar os vômitos. Em várias ocasiões,
+                    Emanuelly aspirava o próprio vômito e chegava
+                    ao hospital com a pele arroxeada.
+                </p>
+                <p>
+                    Durante quase um mês, fui praticamente todos os
+                    dias ao hospital, muitas vezes durante a noite.
+                    Eu tentava explicar o que acontecia, mas nem
+                    sempre acreditavam em mim.
+                </p>
+                <p>
+                    Chegaram a dizer que, como eu já havia perdido
+                    um filho, parecia que eu queria perder outro
+                    por levar minha filha tantas vezes ao hospital.
+                    Aquilo foi doloroso, mas eu não podia ignorar
+                    o que estava vendo. Eu sabia que havia algo
+                    errado e continuaria procurando ajuda.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 12: INTERNAÇÕES -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Internações e complicações</span>
+                <h3>O medo de não saber o que aconteceria</h3>
+                <p>
+                    Emanuelly chegou a pesar aproximadamente 2 kg.
+                    Depois de uma avaliação, foi solicitada uma
+                    videofluoroscopia, que demonstrou que ela
+                    aspirava durante a alimentação.
+                </p>
+                <p>
+                    Ela passou a usar uma sonda nasogástrica e
+                    permaneceu com ela por aproximadamente sete
+                    meses. Mesmo com os cuidados, enfrentamos
+                    complicações respiratórias e internações
+                    graves, incluindo períodos na UTI e paradas
+                    cardiorrespiratórias.
+                </p>
+                <p>
+                    Em uma das internações, na Unicamp, o que
+                    deveria ser uma investigação para realizar
+                    uma endoscopia acabou se tornando uma
+                    permanência de um mês e três dias.
+                    Eu estava longe de casa, acompanhando minha
+                    filha e tentando entender o que estava
+                    acontecendo.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 13: DESCOBERTA DO DIAGNÓSTICO -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Aos 9 meses</span>
+                <h3>Quando finalmente encontramos respostas</h3>
+                <p>
+                    Enquanto a cirurgia para colocar a sonda
+                    diretamente na barriga estava sendo planejada,
+                    um médico que soube do caso de Emanuelly
+                    chegou à Unicamp e suspeitou de Miastenia
+                    Congênita.
+                </p>
+                <p>
+                    Ele pediu que ela fosse examinada antes de
+                    qualquer cirurgia. A investigação, incluindo
+                    a eletroneuromiografia e a resposta ao teste
+                    com piridostigmina, contribuiu para o
+                    diagnóstico.
+                </p>
+                <p>
+                    Depois de tanto tempo procurando uma
+                    explicação, finalmente entendemos que as
+                    dificuldades de Emanuelly estavam relacionadas
+                    a uma condição neuromuscular rara.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 14: A MELHORA -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Depois do diagnóstico</span>
+                <h3>Ver minha filha reagir</h3>
+                <p>
+                    O início do tratamento com Mestinon trouxe
+                    mudanças importantes. Como a apresentação
+                    líquida não estava disponível no Brasil
+                    naquele momento, tivemos dificuldades para
+                    conseguir e administrar o medicamento.
+                </p>
+                <p>
+                    Com o tratamento e o acompanhamento, comecei
+                    a perceber minha filha mais alerta e responsiva,
+                    além da melhora no ganho de peso.
+                </p>
+                <p>
+                    Aos poucos, ela voltou a se alimentar pela
+                    boca, com acompanhamento da equipe de saúde.
+                    A sonda pôde ser retirada por orientação médica.
+                    Depois de tantas incertezas, acompanhar essas
+                    conquistas foi muito significativo para mim.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 15: OS DESAFIOS CONTINUAM -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Ao longo dos anos</span>
+                <h3>O diagnóstico não encerrou os desafios</h3>
+                <p>
+                    Mesmo depois de conhecermos a doença, ainda
+                    enfrentamos situações difíceis. Em uma
+                    internação posterior, Emanuelly recebeu um
+                    medicamento contraindicado para sua condição
+                    e apresentou uma piora grave, com necessidade
+                    de atendimento na UTI.
+                </p>
+                <p>
+                    Eu havia alertado a equipe sobre o diagnóstico
+                    e as restrições. Ver minha filha piorar em uma
+                    situação que poderia ter sido evitada reforçou
+                    meu medo de que os profissionais não conheçam
+                    suficientemente a Miastenia Congênita.
+                </p>
+                <p>
+                    Hoje, aos 18 anos, ela ainda precisa ter cuidado
+                    com os medicamentos e explicar sua condição
+                    durante os atendimentos. Como mãe, continuo
+                    preocupada e atenta, porque sei que informação
+                    e cuidado fazem diferença.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 16: A VOZ DE UMA MÃE -->
+        <div class="timeline-item" data-lado="esquerdo">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Pela voz da minha mãe</span>
+                <span class="timeline-ano">Uma lembrança marcante</span>
+                <h3>Eu nunca deixei de procurar respostas</h3>
+                <p>
+                    Depois do diagnóstico, voltei a procurar o
+                    primeiro pediatra que havia atendido Emanuelly.
+                    Mostrei a ele o diagnóstico e relembrei tudo
+                    o que havia acontecido enquanto eu tentava
+                    conseguir ajuda.
+                </p>
+                <p>
+                    Eu precisava dizer que não havia desistido
+                    da minha filha. Continuei procurando respostas
+                    porque acreditava nela e sabia que alguma
+                    coisa estava errada.
+                </p>
+                <p>
+                    Acredito que nenhuma mãe deveria precisar
+                    enfrentar tudo isso para ser ouvida. Quando
+                    uma família procura ajuda, merece ser acolhida,
+                    respeitada e levada a sério.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 17: NOSSA CAMINHADA -->
+        <div class="timeline-item" data-lado="direito">
+            <div class="timeline-dot">♥</div>
+            <div class="timeline-card">
+                <span class="timeline-voz">♡ Nossa caminhada</span>
+                <span class="timeline-ano">O que aprendemos</span>
+                <h3>Uma história que pode ajudar outras pessoas</h3>
+                <p>
+                    Ouvir minha mãe contar tudo o que vivemos me
+                    fez perceber que nossa história precisava
+                    ser compartilhada. A falta de informação,
+                    a dificuldade para encontrar respostas e
+                    o desconhecimento sobre uma doença rara
+                    tornaram nossa caminhada ainda mais difícil.
+                </p>
+                <p>
+                    Foi dessa percepção que nasceu o Caminho
+                    Leve MC: uma plataforma para reunir informações
+                    confiáveis, compartilhar experiências e
+                    oferecer acolhimento a pessoas com Miastenia
+                    Congênita, familiares e profissionais de saúde.
+                </p>
+                <p>
+                    Quero que outras famílias encontrem informações
+                    que possam ajudá-las e que ninguém precise
+                    sentir que está enfrentando tudo isso sozinho.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+{#
+Bloco de citação em destaque.
+#}
+<!-- CITAÇÃO -->
+<section class="citacao-section">
+    <div class="citacao">
+        <span class="citacao-aspas">“</span>
+
+        <p>
+            A doença faz parte de mim, mas não é toda a minha história.
+        </p>
+
+        <cite>— Emanuelly Arantes de Oliveira</cite>
+    </div>
+</section>
+
+
+{#
+Os 5 valores que guiam o projeto (Acolhimento, Informação, Esperança, Fé, Comunidade).
+#}
+<!-- VALORES -->
+<section class="valores-section">
+
+    <div class="section-title">
+        <span class="titulo-coracao">♡</span>
+        <h2>O que nos guia</h2>
+        <p>Os valores que nasceram da nossa caminhada.</p>
+    </div>
+
+    <div class="valores-grid">
+
+        <!-- VALOR 1 -->
+        <div class="valor-card">
+            <div class="valor-icon">
+                <span>♡</span>
+            </div>
+            <h3>Acolhimento</h3>
+            <p>
+                Ser ouvido sem julgamentos pode mudar uma história.
+                Queremos que cada pessoa encontre aqui respeito,
+                compreensão e espaço para compartilhar sua experiência.
+            </p>
+        </div>
+
+        <!-- VALOR 2 -->
+        <div class="valor-card">
+            <div class="valor-icon">
+                <span>♥</span>
+            </div>
+            <h3>Informação</h3>
+            <p>
+                Para quem convive com uma doença rara, o conhecimento
+                é essencial. Acreditamos que informações acessíveis
+                e confiáveis podem contribuir para decisões mais
+                conscientes e para um cuidado mais seguro.
+            </p>
+        </div>
+
+        <!-- VALOR 3 -->
+        <div class="valor-card">
+            <div class="valor-icon">
+                <span>♡</span>
+            </div>
+            <h3>Esperança</h3>
+            <p>
+                Ter esperança não significa ignorar as dificuldades.
+                Significa reconhecer os dias difíceis e continuar
+                acreditando que ainda existem novas possibilidades,
+                conquistas e caminhos a percorrer.
+            </p>
+        </div>
+
+        <!-- VALOR 4 -->
+        <div class="valor-card">
+            <div class="valor-icon">
+                <span>♥</span>
+            </div>
+            <h3>Fé</h3>
+            <p>
+                Minha fé em Deus é uma fonte de força nos momentos
+                de medo, nas internações e nas incertezas. Ela me
+                lembra de que não preciso enfrentar cada dificuldade
+                sem esperança.
+            </p>
+        </div>
+
+        <!-- VALOR 5 -->
+        <div class="valor-card">
+            <div class="valor-icon">
+                <span>♡</span>
+            </div>
+            <h3>Comunidade</h3>
+            <p>
+                Conviver com uma doença rara pode ser solitário.
+                Queremos aproximar pessoas que compartilham
+                experiências, para que encontrem apoio, troquem
+                conhecimentos e percebam que não estão sozinhas.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+
+{#
+CTA = Call To Action: chamada final convidando a conhecer a comunidade (link com url_for).
+#}
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-box">
+        <h3>Você também tem uma história para contar?</h3>
+        <p>O Caminho Leve MC é um espaço de escuta e partilha. Junte-se a nós.</p>
+        <a href="{{ url_for('principal') }}" class="btn-cta">Conheça a Comunidade 💜</a>
+    </div>
+</section>
+
+{% endblock %}

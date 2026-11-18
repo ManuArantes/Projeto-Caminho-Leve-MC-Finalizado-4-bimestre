@@ -1,0 +1,1641 @@
+{% extends "base.html" %}
+
+{#
+   admin.html — PAINEL ADMINISTRATIVO (só para ADM)
+   Variáveis recebidas do AdminController.exibir_painel() (vêm do AdminService.obter_painel_dados):
+     estatisticas, usuarios, posts_denunciados, respostas_denunciadas, relatos_denunciados, artigos
+   Estrutura: 6 abas -> Visão Geral | Usuários | Artigos | Denúncias do Fórum | Denúncias de Respostas | Denúncias de Relatos.
+   Os botões de ação são pequenos <form method="POST"> que chamam as rotas /admin/... do app.py.
+   Os números vermelhos nas abas (contadores) mostram o que está pendente de moderação.
+#}
+{% block conteudo %}
+<div class="admin-container">
+    <!-- CABEÇALHO DO PAINEL -->
+    <header class="admin-header">
+        <div class="admin-header-title">
+            <span class="admin-badge-role">🛡️ Modo Administrador</span>
+            <h2>Painel de Controle e Moderação</h2>
+            <p>Gerencie usuários, modere denúncias do fórum e relatos, e aprove indicações de artigos científicos.</p>
+        </div>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('principal') }}" class="btn-admin-voltar">← Voltar ao Portal</a>
+        </div>
+    </header>
+
+    {#
+       Botões das abas. data-tab liga cada botão à seção de mesmo id (tab-...). O JS no fim troca a aba ativa.
+    #}
+    <!-- NAVEGAÇÃO DE ABAS -->
+    <nav class="admin-tabs" id="adminTabsNav">
+        <button class="admin-tab-btn active" data-tab="tab-relatorios">
+            📊 Visão Geral
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-usuarios">
+            👥 Usuários
+            <span class="tab-counter">{{ usuarios|length }}</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-artigos">
+            📚 Artigos Médicos
+            {% set pendentes_count = estatisticas.artigos.pendentes or 0 %}
+            {% if pendentes_count > 0 %}
+            <span class="tab-counter alert">{{ pendentes_count }} pendente{{ 's' if pendentes_count > 1 else '' }}</span>
+            {% else %}
+            <span class="tab-counter">{{ artigos|length }}</span>
+            {% endif %}
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-denuncias-forum">
+            💬 Fórum (Posts)
+            {% if posts_denunciados|length > 0 %}
+            <span class="tab-counter alert">{{ posts_denunciados|length }}</span>
+            {% endif %}
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-denuncias-respostas">
+            🗨️ Respostas Fórum
+            {% if respostas_denunciadas|length > 0 %}
+            <span class="tab-counter alert">{{ respostas_denunciadas|length }}</span>
+            {% endif %}
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-denuncias-relatos">
+            📖 Relatos
+            {% if relatos_denunciados|length > 0 %}
+            <span class="tab-counter alert">{{ relatos_denunciados|length }}</span>
+            {% endif %}
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-feedbacks">
+            📬 Feedbacks
+            {% if feedbacks and feedbacks|length > 0 %}
+            <span class="tab-counter" style="background: var(--purple-main); color: #fff;">{{ feedbacks|length }}</span>
+            {% endif %}
+        </button>
+    </nav>
+
+    <!-- CONTEÚDO DAS ABAS -->
+
+    {#
+       ABA 1 — Cartões de estatísticas (usuários, artigos, fórum, relatos) lidos de `estatisticas`, e alertas de ações recomendadas.
+    #}
+    <!-- 1. ABA RELATÓRIOS / VISÃO GERAL -->
+    <section class="admin-tab-content active" id="tab-relatorios">
+        <div class="stats-grid">
+            <!-- Usuários -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-label">Comunidade</span>
+                </div>
+                <div class="stat-value">{{ estatisticas.usuarios.total or 0 }}</div>
+                <div class="stat-details">
+                    <span><strong>{{ estatisticas.usuarios.ativos or 0 }}</strong> ativos</span> •
+                    <span><strong>{{ (estatisticas.usuarios.total or 0) - (estatisticas.usuarios.ativos or 0) }}</strong> inativos</span> •
+                    <span><strong>{{ estatisticas.usuarios.adms or 0 }}</strong> ADMs</span>
+                </div>
+                <button class="stat-link-btn" onclick="selecionarAba('tab-usuarios')">Gerenciar Usuários →</button>
+            </div>
+
+            <!-- Artigos -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-icon">📚</span>
+                    <span class="stat-label">Artigos Médicos</span>
+                </div>
+                <div class="stat-value">{{ estatisticas.artigos.total or 0 }}</div>
+                <div class="stat-details">
+                    <span class="status-pill green"><strong>{{ estatisticas.artigos.aprovados or 0 }}</strong> aprovados</span>
+                    <span class="status-pill yellow"><strong>{{ estatisticas.artigos.pendentes or 0 }}</strong> pendentes</span>
+                </div>
+                <button class="stat-link-btn" onclick="selecionarAba('tab-artigos')">Aprovar / Revisar Artigos →</button>
+            </div>
+
+            <!-- Fórum -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-icon">💬</span>
+                    <span class="stat-label">Discussões do Fórum</span>
+                </div>
+                <div class="stat-value">{{ estatisticas.forum_posts.total or 0 }}</div>
+                <div class="stat-details">
+                    <span><strong>{{ estatisticas.forum_posts.ocultos or 0 }}</strong> posts ocultados (≥3 denúncias)</span><br>
+                    <span><strong>{{ estatisticas.forum_respostas.total or 0 }}</strong> respostas ({{ estatisticas.forum_respostas.inativas or 0 }} inativas)</span>
+                </div>
+                <button class="stat-link-btn" onclick="selecionarAba('tab-denuncias-forum')">Ver Denúncias do Fórum →</button>
+            </div>
+
+            <!-- Relatos -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-icon">📖</span>
+                    <span class="stat-label">Minha História</span>
+                </div>
+                <div class="stat-value">{{ estatisticas.relatos.total or 0 }}</div>
+                <div class="stat-details">
+                    <span><strong>{{ estatisticas.relatos.ocultos or 0 }}</strong> relatos ocultados por denúncias</span><br>
+                    <span><strong>{{ estatisticas.total_denuncias_relatos or 0 }}</strong> votos de denúncias totais</span>
+                </div>
+                <button class="stat-link-btn" onclick="selecionarAba('tab-denuncias-relatos')">Ver Denúncias de Relatos →</button>
+            </div>
+
+            <!-- Feedbacks (JSON) -->
+            <div class="stat-card" style="border-top: 3px solid var(--purple-main);">
+                <div class="stat-card-header">
+                    <span class="stat-icon">📬</span>
+                    <span class="stat-label">Feedbacks da Comunidade</span>
+                </div>
+                <div class="stat-value">{{ feedbacks|length if feedbacks else 0 }}</div>
+                <div class="stat-details">
+                    <span>Mensagens e sugestões enviadas por visitantes (armazenadas em JSON)</span>
+                </div>
+                <button class="stat-link-btn" onclick="selecionarAba('tab-feedbacks')">Ver Feedbacks Recebidos →</button>
+            </div>
+        </div>
+
+        {#
+           Mostra avisos só quando há algo a fazer (artigos pendentes, itens denunciados); se nada pendente, mostra 'tudo em dia'.
+        #}
+        <!-- Alertas e Ações Recomendadas -->
+        <div class="admin-box" style="margin-top: 2rem;">
+            <h3>⚡ Ações Rápidas & Pendências Prioritárias</h3>
+            <div class="alert-cards-row">
+                {% set artigos_pend = estatisticas.artigos.pendentes or 0 %}
+                {% if artigos_pend > 0 %}
+                <div class="quick-alert-card yellow">
+                    <span class="icon">⚠️</span>
+                    <div>
+                        <strong>{{ artigos_pend }} artigo(s) aguardando aprovação</strong>
+                        <p>Usuários sugeriram artigos científicos que precisam de validação médica/editorial.</p>
+                        <button onclick="selecionarAba('tab-artigos')" class="btn-sm btn-primary">Analisar Artigos</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if posts_denunciados|length > 0 %}
+                <div class="quick-alert-card red">
+                    <span class="icon">🚨</span>
+                    <div>
+                        <strong>{{ posts_denunciados|length }} publicação(ões) do fórum com denúncias</strong>
+                        <p>Revise os posts denunciados pelos usuários para decidir se devem ser restaurados ou removidos.</p>
+                        <button onclick="selecionarAba('tab-denuncias-forum')" class="btn-sm btn-danger">Moderar Posts</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if respostas_denunciadas|length > 0 %}
+                <div class="quick-alert-card red">
+                    <span class="icon">🚨</span>
+                    <div>
+                        <strong>{{ respostas_denunciadas|length }} resposta(s) com denúncia ou inativadas</strong>
+                        <p>Respostas de usuários que foram sinalizadas pela comunidade.</p>
+                        <button onclick="selecionarAba('tab-denuncias-respostas')" class="btn-sm btn-danger">Moderar Respostas</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if relatos_denunciados|length > 0 %}
+                <div class="quick-alert-card red">
+                    <span class="icon">🚨</span>
+                    <div>
+                        <strong>{{ relatos_denunciados|length }} relato(s) de história com denúncias</strong>
+                        <p>Histórias compartilhadas com sinalizações pendentes.</p>
+                        <button onclick="selecionarAba('tab-denuncias-relatos')" class="btn-sm btn-danger">Moderar Relatos</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if artigos_pend == 0 and posts_denunciados|length == 0 and respostas_denunciadas|length == 0 and relatos_denunciados|length == 0 %}
+                <div class="quick-alert-card green">
+                    <span class="icon">✅</span>
+                    <div>
+                        <strong>Tudo sob controle!</strong>
+                        <p>Não há artigos pendentes de revisão nem denúncias não resolvidas no momento.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {#
+       ABA 2 — Tabela de todos os usuários com busca (filtrarTabela) e ações de ativar/desativar e promover/rebaixar.
+    #}
+    <!-- 2. ABA USUÁRIOS -->
+    <section class="admin-tab-content" id="tab-usuarios">
+        <div class="admin-box">
+            <div class="box-header-row">
+                <div>
+                    <h3>Gerenciamento de Usuários</h3>
+                    <p>Ative ou desative contas e gerencie privilégios administrativos.</p>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="filtroUsuarios" placeholder="Buscar por nome, email ou cidade..." onkeyup="filtrarTabela('filtroUsuarios', 'tabelaUsuarios')">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="admin-table" id="tabelaUsuarios">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Localização</th>
+                            <th>Perfil</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td><strong>{{ u.get_nome() }}</strong></td>
+                            <td>{{ u.get_email() }}</td>
+                            <td>{{ u.get_cidade() or '-' }} / {{ u.get_estado() or '-' }}</td>
+                            <td>
+                                {% if u.get_tipo() == 'ADM' %}
+                                <span class="badge-role-adm">ADM</span>
+                                {% else %}
+                                <span class="badge-role-user">{{ u.get_tipo() or 'Portador' }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.get_ativo() == 'S' %}
+                                <span class="status-indicator active">● Ativo</span>
+                                {% else %}
+                                <span class="status-indicator inactive">● Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td class="action-buttons">
+                                {% if u.get_email() != session.get('usuario_email') %}
+                                    <!-- Alternar Status (Ativar / Desativar) -->
+                                    {% if u.get_ativo() == 'S' %}
+                                    <form action="{{ url_for('admin_usuario_status', email=u.get_email()) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente desativar este usuário? Ele não conseguirá mais efetuar login.');">
+                                        <button type="submit" class="btn-action btn-warning" title="Desativar Conta">
+                                            🚫 Desativar
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form action="{{ url_for('admin_usuario_status', email=u.get_email()) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn-action btn-success" title="Ativar Conta">
+                                            ✅ Ativar
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    <!-- Alternar Tipo (ADM / Portador) -->
+                                    <form action="{{ url_for('admin_usuario_tipo', email=u.get_email()) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja alternar os privilégios deste usuário?');">
+                                        {% if u.get_tipo() == 'ADM' %}
+                                        <button type="submit" class="btn-action btn-outline" title="Tornar usuário comum">
+                                            ⬇️ Rebaixar
+                                        </button>
+                                        {% else %}
+                                        <button type="submit" class="btn-action btn-promote" title="Promover a Administrador">
+                                            ⭐ Promover ADM
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                {% else %}
+                                    <span class="self-badge">Sua conta atual</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    {#
+       ABA 3 — Todos os artigos com status (pendente/aprovado/rejeitado) e botões Aprovar, Rejeitar, Excluir. Botão para cadastrar novo artigo (abre modal).
+    #}
+    <!-- 3. ABA ARTIGOS MÉDICOS -->
+    <section class="admin-tab-content" id="tab-artigos">
+        <div class="admin-box">
+            <div class="box-header-row">
+                <div>
+                    <h3>Gestão de Artigos Médicos & Científicos</h3>
+                    <p>Aprove ou rejeite sugestões de artigos enviadas pelos usuários ou adicione novos artigos aprovados.</p>
+                </div>
+                <div>
+                    <button class="btn-primary" onclick="abrirModalNovoArtigo()">+ Novo Artigo Direto</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 32%;">Título & Link</th>
+                            <th>Autor / Ano</th>
+                            <th>Origem / Tipo</th>
+                            <th>Status Revisão</th>
+                            <th>Cadastrado Por</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in artigos %}
+                        <tr>
+                            <td>
+                                <strong>{{ a.get_titulo() }}</strong>
+                                {% if a.get_url() %}
+                                <br><a href="{{ a.get_url() }}" target="_blank" rel="noopener noreferrer" class="link-externo">🔗 Acessar Artigo Original ↗</a>
+                                {% endif %}
+                            </td>
+                            <td>{{ a.get_autor() or 'Não informado' }} <br><small class="text-muted">Ano: {{ a.get_ano_artigo() or '-' }}</small></td>
+                            <td>{{ a.get_origem() or 'PubMed / Scielo' }} <br><small class="text-muted">{{ a.get_tipo() or 'Artigo' }}</small></td>
+                            <td>
+                                {% if a.get_revisado() in ['1', 'S'] %}
+                                <span class="badge-status-approved">✓ Aprovado</span>
+                                {% elif a.get_revisado() == 'R' %}
+                                <span class="badge-status-rejected">✕ Rejeitado</span>
+                                {% else %}
+                                <span class="badge-status-pending">⏳ Pendente</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ a.get_criado_por() or 'Sistema' }}</small></td>
+                            <td class="action-buttons">
+                                {% if a.get_revisado() not in ['1', 'S'] %}
+                                <form action="{{ url_for('admin_artigo_aprovar', artigo_id=a.get_id()) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn-action btn-success" title="Aprovar Artigo">
+                                        ✓ Aprovar
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if a.get_revisado() != 'R' %}
+                                <form action="{{ url_for('admin_artigo_rejeitar', artigo_id=a.get_id()) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja rejeitar este artigo? Ele não aparecerá na listagem pública.');">
+                                    <button type="submit" class="btn-action btn-warning" title="Rejeitar Artigo">
+                                        ✕ Rejeitar
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <form action="{{ url_for('admin_artigo_excluir', artigo_id=a.get_id()) }}" method="POST" style="display:inline;" onsubmit="return confirm('ATENÇÃO: Deseja excluir permanentemente este artigo do banco de dados?');">
+                                    <button type="submit" class="btn-action btn-danger" title="Excluir Artigo">
+                                        🗑️ Excluir
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    {#
+       ABA 4 — Posts denunciados. Mostra total de denúncias, quem denunciou, e ações: descartar denúncias, ocultar/mostrar, excluir.
+    #}
+    <!-- 4. ABA DENÚNCIAS - POSTS DO FÓRUM -->
+    <section class="admin-tab-content" id="tab-denuncias-forum">
+        <div class="admin-box">
+            <div class="box-header-row">
+                <div>
+                    <h3>Denúncias em Tópicos do Fórum</h3>
+                    <p>Posts que receberam denúncias dos membros. Posts com 3 ou mais denúncias ficam automaticamente ocultos no portal.</p>
+                </div>
+            </div>
+
+            {% if posts_denunciados|length == 0 %}
+            <div class="empty-state">
+                <span class="icon">✨</span>
+                <h4>Nenhuma denúncia pendente em tópicos do fórum!</h4>
+                <p>Todos os posts estão dentro das diretrizes da comunidade.</p>
+            </div>
+            {% else %}
+            <div class="denuncias-cards-list">
+                {% for p in posts_denunciados %}
+                <div class="denuncia-item-card {% if p.denuncia >= 3 %}card-oculto{% endif %}">
+                    <div class="denuncia-item-header">
+                        <div class="item-author-info">
+                            <strong>{{ p.autor_nome }}</strong> ({{ p.autor_id }})
+                            <span class="post-time">{{ p.criado_em.strftime('%d/%m/%Y às %H:%M') if p.criado_em else '' }}</span>
+                        </div>
+                        <div class="denuncia-pills">
+                            <span class="badge-denuncia-count">🚨 {{ p.total_denuncias or p.denuncia }} denúncia{{ 's' if (p.total_denuncias or p.denuncia) > 1 else '' }}</span>
+                            {% if p.denuncia >= 3 %}
+                            <span class="badge-status-hidden">🔒 Oculto no Portal (≥3 denúncias)</span>
+                            {% else %}
+                            <span class="badge-status-visible">👁️ Visível no Portal</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="denuncia-item-body">
+                        <p class="post-content-text">"{{ p.texto }}"</p>
+                    </div>
+
+                    <!-- Denunciantes -->
+                    {% if p.detalhes_denuncias %}
+                    <div class="denunciantes-details">
+                        <span class="sub-label">Denunciado por:</span>
+                        <div class="denunciantes-tags">
+                            {% for d in p.detalhes_denuncias %}
+                            <span class="denunciante-tag">👤 {{ d.denunciante_nome or d.usuario_email }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="denuncia-item-footer">
+                        <div class="footer-actions">
+                            <!-- Descartar Denúncias e Restaurar -->
+                            <form action="{{ url_for('admin_forum_limpar', forum_id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja descartar as denúncias deste post? O contador será zerado e o post voltará a ficar visível.');">
+                                <button type="submit" class="btn-action btn-success">
+                                    🧹 Descartar Denúncias & Restaurar
+                                </button>
+                            </form>
+
+                            <!-- Alternar Ocultação Manual -->
+                            <form action="{{ url_for('admin_forum_ocultar', forum_id=p.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-action btn-warning">
+                                    {% if p.denuncia >= 3 %}👁️ Tornar Visível{% else %}🔒 Ocultar Post{% endif %}
+                                </button>
+                            </form>
+
+                            <!-- Excluir Permanentemente -->
+                            <form action="{{ url_for('admin_forum_excluir', forum_id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('PERIGO: Esta ação excluirá permanentemente este tópico e TODAS as suas respostas. Confirmar exclusão?');">
+                                <button type="submit" class="btn-action btn-danger">
+                                    🗑️ Excluir Definitivamente
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {#
+       ABA 5 — Respostas denunciadas ou inativas: limpar denúncias, inativar/reativar, excluir.
+    #}
+    <!-- 5. ABA DENÚNCIAS - RESPOSTAS DO FÓRUM -->
+    <section class="admin-tab-content" id="tab-denuncias-respostas">
+        <div class="admin-box">
+            <div class="box-header-row">
+                <div>
+                    <h3>Denúncias em Respostas do Fórum</h3>
+                    <p>Respostas sinalizadas com denúncias ou desativadas (ativo = 'N'). Respostas inativadas não são exibidas aos usuários comuns.</p>
+                </div>
+            </div>
+
+            {% if respostas_denunciadas|length == 0 %}
+            <div class="empty-state">
+                <span class="icon">✨</span>
+                <h4>Nenhuma resposta denunciada no momento!</h4>
+                <p>Todas as respostas da comunidade estão em conformidade.</p>
+            </div>
+            {% else %}
+            <div class="denuncias-cards-list">
+                {% for r in respostas_denunciadas %}
+                <div class="denuncia-item-card {% if r.ativo == 'N' %}card-oculto{% endif %}">
+                    <div class="denuncia-item-header">
+                        <div class="item-author-info">
+                            <strong>{{ r.autor_nome }}</strong> ({{ r.autor_email }})
+                            <span class="post-time">{{ r.criado_em.strftime('%d/%m/%Y às %H:%M') if r.criado_em else '' }}</span>
+                        </div>
+                        <div class="denuncia-pills">
+                            <span class="badge-denuncia-count">🚨 {{ r.total_denuncias }} denúncia{{ 's' if r.total_denuncias > 1 else '' }}</span>
+                            {% if r.ativo == 'N' %}
+                            <span class="badge-status-hidden">🔒 Inativa / Oculta</span>
+                            {% else %}
+                            <span class="badge-status-visible">👁️ Ativa</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="denuncia-context-parent">
+                        <small>Respondendo ao post:</small>
+                        <p class="parent-snippet">"{{ r.post_texto }}"</p>
+                    </div>
+
+                    <div class="denuncia-item-body">
+                        <span class="sub-label">Texto da resposta denunciada:</span>
+                        <p class="post-content-text" style="margin-top: 0.3rem;">"{{ r.texto }}"</p>
+                    </div>
+
+                    <!-- Denunciantes -->
+                    {% if r.detalhes_denuncias %}
+                    <div class="denunciantes-details">
+                        <span class="sub-label">Denunciado por:</span>
+                        <div class="denunciantes-tags">
+                            {% for d in r.detalhes_denuncias %}
+                            <span class="denunciante-tag">👤 {{ d.denunciante_nome or d.usuario_email }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="denuncia-item-footer">
+                        <div class="footer-actions">
+                            <!-- Limpar denúncias e reativar -->
+                            <form action="{{ url_for('admin_resposta_limpar', resposta_id=r.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja limpar as denúncias desta resposta e reativá-la no fórum?');">
+                                <button type="submit" class="btn-action btn-success">
+                                    🧹 Limpar Denúncias & Reativar
+                                </button>
+                            </form>
+
+                            <!-- Alternar Ativo/Inativo -->
+                            <form action="{{ url_for('admin_resposta_status', resposta_id=r.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-action btn-warning">
+                                    {% if r.ativo == 'N' %}👁️ Reativar Resposta{% else %}🔒 Inativar Resposta{% endif %}
+                                </button>
+                            </form>
+
+                            <!-- Excluir permanentemente -->
+                            <form action="{{ url_for('admin_resposta_excluir', resposta_id=r.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja excluir permanentemente esta resposta?');">
+                                <button type="submit" class="btn-action btn-danger">
+                                    🗑️ Excluir Definitivamente
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {#
+       ABA 6 — Relatos denunciados: mesmas ações dos posts.
+    #}
+    <!-- 6. ABA DENÚNCIAS - RELATOS -->
+    <section class="admin-tab-content" id="tab-denuncias-relatos">
+        <div class="admin-box">
+            <div class="box-header-row">
+                <div>
+                    <h3>Denúncias em Relatos ("Minha História")</h3>
+                    <p>Relatos de histórias de pacientes denunciados. Com 3 ou mais denúncias, ficam ocultados automaticamente para os usuários.</p>
+                </div>
+            </div>
+
+            {% if relatos_denunciados|length == 0 %}
+            <div class="empty-state">
+                <span class="icon">✨</span>
+                <h4>Nenhum relato denunciado no momento!</h4>
+                <p>Todos os relatos compartilhados estão dentro das normas do portal.</p>
+            </div>
+            {% else %}
+            <div class="denuncias-cards-list">
+                {% for rel in relatos_denunciados %}
+                <div class="denuncia-item-card {% if rel.denuncia >= 3 %}card-oculto{% endif %}">
+                    <div class="denuncia-item-header">
+                        <div class="item-author-info">
+                            <strong>{{ rel.autor_nome }}</strong> ({{ rel.autor_email }})
+                            <span class="post-time">{{ rel.criado_em.strftime('%d/%m/%Y às %H:%M') if rel.criado_em else '' }}</span>
+                        </div>
+                        <div class="denuncia-pills">
+                            <span class="badge-denuncia-count">🚨 {{ rel.total_denuncias or rel.denuncia }} denúncia{{ 's' if (rel.total_denuncias or rel.denuncia) > 1 else '' }}</span>
+                            {% if rel.denuncia >= 3 %}
+                            <span class="badge-status-hidden">🔒 Oculto no Portal (≥3 denúncias)</span>
+                            {% else %}
+                            <span class="badge-status-visible">👁️ Visível no Portal</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="denuncia-item-body">
+                        <p class="post-content-text">"{{ rel.texto }}"</p>
+                    </div>
+
+                    <!-- Denunciantes -->
+                    {% if rel.detalhes_denuncias %}
+                    <div class="denunciantes-details">
+                        <span class="sub-label">Denunciado por:</span>
+                        <div class="denunciantes-tags">
+                            {% for d in rel.detalhes_denuncias %}
+                            <span class="denunciante-tag">👤 {{ d.denunciante_nome or d.usuario_email }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="denuncia-item-footer">
+                        <div class="footer-actions">
+                            <!-- Descartar Denúncias e Restaurar -->
+                            <form action="{{ url_for('admin_relato_limpar', relato_id=rel.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja descartar as denúncias deste relato e restaurá-lo na página pública?');">
+                                <button type="submit" class="btn-action btn-success">
+                                    🧹 Descartar Denúncias & Restaurar
+                                </button>
+                            </form>
+
+                            <!-- Alternar Ocultação Manual -->
+                            <form action="{{ url_for('admin_relato_ocultar', relato_id=rel.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-action btn-warning">
+                                    {% if rel.denuncia >= 3 %}👁️ Tornar Visível{% else %}🔒 Ocultar Relato{% endif %}
+                                </button>
+                            </form>
+
+                            <!-- Excluir Permanentemente -->
+                            <form action="{{ url_for('admin_relato_excluir', relato_id=rel.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Deseja excluir permanentemente este relato?');">
+                                <button type="submit" class="btn-action btn-danger">
+                                    🗑️ Excluir Definitivamente
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- 7. ABA FEEDBACKS DA COMUNIDADE (ARMAZENADOS EM JSON) -->
+    <section class="admin-tab-content" id="tab-feedbacks">
+        <div class="admin-box">
+            <div class="box-header-row">
+                <div>
+                    <h3>📬 Feedbacks da Comunidade ({{ feedbacks|length if feedbacks else 0 }})</h3>
+                    <p class="box-subtitle">Mensagens e sugestões enviadas através da página de Feedback. Armazenadas com segurança no arquivo JSON.</p>
+                </div>
+                {% if feedbacks and feedbacks|length > 0 %}
+                <div class="search-box">
+                    <input type="text" id="filtroFeedbacks" placeholder="Buscar feedback..." onkeyup="filtrarCardsFeedbacks()">
+                </div>
+                {% endif %}
+            </div>
+
+            {% if not feedbacks or feedbacks|length == 0 %}
+            <div class="empty-state">
+                <span class="empty-icon">📭</span>
+                <h4>Nenhum feedback recebido ainda</h4>
+                <p>Quando visitantes ou membros enviarem sugestões pela página de Feedback, elas aparecerão listadas exclusivamente aqui.</p>
+            </div>
+            {% else %}
+            <div class="denuncias-list" id="listaFeedbacks">
+                {% for fb in feedbacks %}
+                <div class="denuncia-item card-feedback-item" style="border-left: 4px solid var(--purple-main);">
+                    <div class="denuncia-item-header">
+                        <div class="post-author-info">
+                            <span class="author-avatar" style="font-size: 1.5rem;">💌</span>
+                            <div>
+                                <strong style="color: var(--purple-dark); font-size: 1.05rem;" class="fb-nome-txt">{{ fb.nome }}</strong>
+                                <span class="post-time" style="color: #666; font-size: 0.82rem;">📅 {{ fb.data }}</span>
+                            </div>
+                        </div>
+                        <span class="badge-role-user">ID #{{ fb.id }}</span>
+                    </div>
+
+                    <div class="denuncia-item-body" style="margin: 1rem 0;">
+                        <p class="post-content-text fb-conteudo-txt" style="font-size: 0.98rem; color: #222; line-height: 1.6; white-space: pre-wrap;">{{ fb.texto }}</p>
+                    </div>
+
+                    <div class="denuncia-item-footer">
+                        <div class="footer-actions">
+                            <form action="{{ url_for('admin_feedback_excluir', feedback_id=fb.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir permanentemente este feedback?');">
+                                <button type="submit" class="btn-action btn-danger">
+                                    🗑️ Excluir Feedback
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+{#
+   Janela para o ADM cadastrar um artigo já aprovado -> POST /admin/artigo/novo.
+#}
+<!-- MODAL CADASTRAR NOVO ARTIGO DIRETO (ADMIN) -->
+<div id="modalNovoArtigo" class="admin-modal" style="display: none;">
+    <div class="admin-modal-backdrop" onclick="fecharModalNovoArtigo()"></div>
+    <div class="admin-modal-content">
+        <div class="admin-modal-header">
+            <h3>📖 Cadastrar Novo Artigo Científico</h3>
+            <button type="button" class="btn-close-modal" onclick="fecharModalNovoArtigo()">✕</button>
+        </div>
+        <form action="{{ url_for('admin_artigo_novo') }}" method="POST">
+            <div class="form-group">
+                <label for="novo_titulo">Título do Artigo / Estudo *</label>
+                <input type="text" id="novo_titulo" name="titulo" required placeholder="Ex: Congenital Myasthenic Syndromes: Clinical and Molecular Features" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="novo_url">Link / URL Oficial *</label>
+                <input type="url" id="novo_url" name="url" required placeholder="https://pubmed.ncbi.nlm.nih.gov/..." class="form-control">
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="novo_autor">Autor Principal / Grupo</label>
+                    <input type="text" id="novo_autor" name="autor" placeholder="Ex: Engel AG et al." class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="novo_ano">Ano de Publicação</label>
+                    <input type="number" id="novo_ano" name="ano_artigo" placeholder="Ex: 2023" min="1950" max="2030" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="nova_origem">Origem / Periódico</label>
+                    <input type="text" id="nova_origem" name="origem" placeholder="Ex: PubMed, Orphanet, The Lancet" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="novo_tipo">Tipo de Artigo</label>
+                    <input type="text" id="novo_tipo" name="tipo" placeholder="Ex: Revisão Científica, Ensaio Clínico" class="form-control">
+                </div>
+            </div>
+
+            <p class="modal-notice">ℹ️ Este artigo será cadastrado com status <strong>Aprovado</strong> diretamente pelo Administrador.</p>
+
+            <div class="modal-footer-buttons">
+                <button type="button" class="btn-secondary" onclick="fecharModalNovoArtigo()">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar e Publicar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{#
+   A partir daqui até </style>: CSS só do painel (~800 linhas).
+#}
+<!-- ESTILOS EXCLUSIVOS DO PAINEL ADMINISTRATIVO -->
+<style>
+.admin-container {
+    max-width: 1200px;
+    margin: 2rem auto 4rem;
+    padding: 0 1.5rem;
+}
+
+.admin-header {
+    background: linear-gradient(135deg, #2e0854 0%, #4a148c 50%, #6a1b9a 100%);
+    border-radius: var(--radius-lg);
+    padding: 2.2rem 2.5rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    box-shadow: 0 10px 30px rgba(74, 20, 140, 0.25);
+    margin-bottom: 2rem;
+}
+
+.admin-badge-role {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    color: #ffd54f;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    margin-bottom: 0.6rem;
+}
+
+.admin-header-title h2 {
+    font-size: 1.85rem;
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.admin-header-title p {
+    color: #ede7f6;
+    font-size: 0.95rem;
+    max-width: 650px;
+    margin: 0;
+}
+
+.btn-admin-voltar {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 0.65rem 1.25rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-admin-voltar:hover {
+    background: #fff;
+    color: var(--purple-dark);
+}
+
+/* NAVEGAÇÃO DE ABAS */
+.admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 2px solid #e1bee7;
+}
+
+.admin-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.85rem 1.3rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    position: relative;
+    transition: var(--transition);
+}
+
+.admin-tab-btn:hover {
+    color: var(--purple-main);
+    background: rgba(106, 27, 154, 0.05);
+}
+
+.admin-tab-btn.active {
+    color: var(--purple-dark);
+    font-weight: 700;
+}
+
+.admin-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--purple-main);
+    border-radius: 3px 3px 0 0;
+}
+
+.tab-counter {
+    background: #ede7f6;
+    color: var(--purple-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+}
+
+.tab-counter.alert {
+    background: #ff5252;
+    color: #fff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* CONTEÚDO DAS ABAS */
+.admin-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.admin-tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* CARDS DE ESTATÍSTICAS */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 1.6rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(106, 27, 154, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--purple-dark);
+    line-height: 1.1;
+    margin-bottom: 0.6rem;
+}
+
+.stat-details {
+    font-size: 0.85rem;
+    color: var(--text-body);
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+}
+
+.stat-link-btn {
+    background: none;
+    border: none;
+    color: var(--purple-main);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.stat-link-btn:hover {
+    color: var(--purple-dark);
+    text-decoration: underline;
+}
+
+/* CAIXAS GERAIS DE ADMIN */
+.admin-box {
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(106, 27, 154, 0.08);
+}
+
+.box-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.box-header-row h3 {
+    font-size: 1.3rem;
+    color: var(--purple-dark);
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.box-header-row p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.search-box input {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #d1c4e9;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    min-width: 280px;
+    outline: none;
+    transition: var(--transition);
+}
+
+.search-box input:focus {
+    border-color: var(--purple-main);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+}
+
+/* ALERTAS RÁPIDOS */
+.alert-cards-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.quick-alert-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius-sm);
+    border-left: 5px solid transparent;
+}
+
+.quick-alert-card .icon {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.quick-alert-card p {
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0.75rem;
+    color: var(--text-body);
+}
+
+.quick-alert-card.yellow {
+    background: #fff8e1;
+    border-left-color: #ffb300;
+}
+
+.quick-alert-card.red {
+    background: #ffebee;
+    border-left-color: #e53935;
+}
+
+.quick-alert-card.green {
+    background: #e8f5e9;
+    border-left-color: #43a047;
+}
+
+/* TABELAS */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.admin-table th {
+    background: #f8f4fc;
+    color: var(--purple-dark);
+    font-weight: 700;
+    padding: 1rem;
+    border-bottom: 2px solid #ede7f6;
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0edf5;
+    vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+    background-color: #faf7fd;
+}
+
+/* BADGES & PILLS */
+.status-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.status-pill.green { background: #e8f5e9; color: #2e7d32; }
+.status-pill.yellow { background: #fff8e1; color: #f57f17; }
+
+.status-indicator {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.status-indicator.active { color: #2e7d32; }
+.status-indicator.inactive { color: #c62828; }
+
+.badge-role-adm {
+    background: #4a148c;
+    color: #fff;
+    padding: 0.25rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-role-user {
+    background: #ede7f6;
+    color: var(--purple-main);
+    padding: 0.25rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-status-approved {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.25rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-status-pending {
+    background: #fff8e1;
+    color: #e65100;
+    padding: 0.25rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-status-rejected {
+    background: #ffebee;
+    color: #c62828;
+    padding: 0.25rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-denuncia-count {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.badge-status-hidden {
+    background: #eceff1;
+    color: #455a64;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-status-visible {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.self-badge {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* BOTÕES DE AÇÃO */
+.action-buttons {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    border: none;
+    padding: 0.45rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-action.btn-success {
+    background: #2e7d32;
+    color: #fff;
+}
+.btn-action.btn-success:hover { background: #1b5e20; }
+
+.btn-action.btn-warning {
+    background: #f57f17;
+    color: #fff;
+}
+.btn-action.btn-warning:hover { background: #e65100; }
+
+.btn-action.btn-danger {
+    background: #c62828;
+    color: #fff;
+}
+.btn-action.btn-danger:hover { background: #b71c1c; }
+
+.btn-action.btn-outline {
+    background: transparent;
+    border: 1px solid #7a7a9a;
+    color: #555;
+}
+.btn-action.btn-outline:hover { background: #f0f0f0; }
+
+.btn-action.btn-promote {
+    background: #ede7f6;
+    color: var(--purple-dark);
+    border: 1px solid var(--purple-light);
+}
+.btn-action.btn-promote:hover {
+    background: var(--purple-main);
+    color: #fff;
+}
+
+.btn-primary {
+    background: var(--purple-main);
+    color: #fff;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-primary:hover { background: var(--purple-dark); }
+
+.btn-secondary {
+    background: #ede7f6;
+    color: var(--purple-dark);
+    border: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.82rem;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn-sm.btn-primary { background: var(--purple-main); color: #fff; }
+.btn-sm.btn-danger { background: #c62828; color: #fff; }
+
+.link-externo {
+    color: var(--purple-main);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.link-externo:hover { text-decoration: underline; }
+
+/* CARDS DE DENÚNCIAS */
+.denuncias-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.denuncia-item-card {
+    background: #fff;
+    border: 1px solid #ede7f6;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.denuncia-item-card.card-oculto {
+    border-left: 5px solid #e53935;
+    background: #fffbfa;
+}
+
+.denuncia-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+}
+
+.item-author-info {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.post-time {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.denuncia-pills {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.post-content-text {
+    font-size: 0.98rem;
+    color: #2c2c40;
+    line-height: 1.6;
+    background: #fbf9fd;
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--purple-light);
+    font-style: italic;
+    white-space: pre-line;
+}
+
+.denuncia-context-parent {
+    background: #f5f5f7;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+.parent-snippet {
+    color: var(--text-muted);
+    margin: 0.2rem 0 0;
+    font-style: italic;
+}
+
+.denunciantes-details {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e0d8eb;
+}
+
+.sub-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.denunciantes-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.denunciante-tag {
+    background: #ffebee;
+    color: #b71c1c;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+}
+
+.denuncia-item-footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0edf5;
+}
+
+.footer-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--text-muted);
+}
+.empty-state .icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.8rem;
+}
+.empty-state h4 {
+    color: var(--purple-dark);
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+}
+
+/* MODAL */
+.admin-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.admin-modal-backdrop {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(26, 0, 51, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.admin-modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: var(--radius-md);
+    width: 100%;
+    max-width: 640px;
+    padding: 2.2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.8rem;
+}
+
+.admin-modal-header h3 {
+    color: var(--purple-dark);
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-dark);
+    margin-bottom: 0.35rem;
+}
+.form-control {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border: 1px solid #d1c4e9;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+}
+.form-control:focus {
+    border-color: var(--purple-main);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.modal-notice {
+    font-size: 0.85rem;
+    color: #4a148c;
+    background: #f3e5f5;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+}
+
+.modal-footer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.75rem;
+    }
+    .form-row-2 {
+        grid-template-columns: 1fr;
+    }
+    .box-header-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-box input {
+        min-width: 100%;
+    }
+}
+</style>
+
+<!-- SCRIPTS DE INTERATIVIDADE DO PAINEL -->
+<script>
+// Ativa a aba clicada (botão e conteúdo) e atualiza a URL com ?tab=... sem recarregar, assim o redirect do Controller reabre a aba certa após cada ação.
+function selecionarAba(tabId) {
+    const tabs = document.querySelectorAll('.admin-tab-btn');
+    const contents = document.querySelectorAll('.admin-tab-content');
+
+    tabs.forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    contents.forEach(content => {
+        if (content.id === tabId) {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+
+    // Atualiza a URL sem recarregar a página
+    const param = tabId.replace('tab-', '');
+    const url = new URL(window.location);
+    url.searchParams.set('tab', param);
+    window.history.replaceState({}, '', url);
+}
+
+// Ao carregar: liga o clique dos botões das abas e, se a URL tiver ?tab=, abre essa aba (é o que acontece depois de aprovar um artigo, por exemplo).
+document.addEventListener('DOMContentLoaded', () => {
+    // Configura cliques nos botões de abas
+    const tabs = document.querySelectorAll('.admin-tab-btn');
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selecionarAba(btn.getAttribute('data-tab'));
+        });
+    });
+
+    // Verifica parâmetro ?tab= na URL para abrir aba correspondente
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam) {
+        const targetTab = 'tab-' + tabParam;
+        if (document.getElementById(targetTab)) {
+            selecionarAba(targetTab);
+        }
+    }
+});
+
+// Filtro da tabela de usuários: esconde as linhas (<tr>) cujo texto não contém o que foi digitado (pula a linha 0 = cabeçalho).
+// Filtro rápido de tabela
+function filtrarTabela(inputId, tableId) {
+    const input = document.getElementById(inputId);
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById(tableId);
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+        const text = tr[i].textContent.toLowerCase();
+        if (text.indexOf(filter) > -1) {
+            tr[i].style.display = '';
+        } else {
+            tr[i].style.display = 'none';
+        }
+    }
+}
+
+// Abre e fecha a janela de cadastro de artigo.
+// Modal Novo Artigo
+function abrirModalNovoArtigo() {
+    document.getElementById('modalNovoArtigo').style.display = 'flex';
+}
+
+function fecharModalNovoArtigo() {
+    document.getElementById('modalNovoArtigo').style.display = 'none';
+}
+
+// Filtro para busca de feedbacks
+function filtrarCardsFeedbacks() {
+    const input = document.getElementById('filtroFeedbacks');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const cards = document.querySelectorAll('.card-feedback-item');
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = (text.indexOf(filter) > -1) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

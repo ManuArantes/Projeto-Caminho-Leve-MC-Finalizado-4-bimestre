@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{#
+   recuperar_senha.html — RECUPERAÇÃO DE SENHA, PASSO 1 DE 3: informar o e-mail
+   Envia (POST) para a mesma rota /recuperar_senha. Se o e-mail existir, o Controller segue para as perguntas.
+   `email_informado` repõe o que a pessoa digitou caso dê erro.
+#}
+{% block conteudo %}
+<div class="recuperar-wrapper">
+    <div class="recuperar-card">
+        <div class="recuperar-header">
+            <span class="recuperar-icon">🔐</span>
+            <h2>Recuperação de Acesso</h2>
+            <p>Informe o seu e-mail cadastrado para responder às suas <strong>perguntas de segurança</strong>.</p>
+        </div>
+
+        <form action="{{ url_for('recuperar_senha') }}" method="POST" class="recuperar-form">
+            <div class="form-group-recup">
+                <label for="recup-email">Seu E-mail Cadastrado</label>
+                <input type="email" id="recup-email" name="email" required 
+                       value="{{ email_informado or '' }}"
+                       placeholder="seuemail@exemplo.com" class="input-recup">
+            </div>
+
+            <div class="aviso-seguranca-box">
+                <span class="icon">ℹ️</span>
+                <div>
+                    <strong>Sem envio de e-mail:</strong>
+                    <p>Por razões de privacidade, a validação é feita diretamente aqui confirmando 3 dados do seu cadastro. Você terá até <strong>3 tentativas</strong>.</p>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-recuperar-proximo">
+                Avançar para Perguntas de Segurança →
+            </button>
+
+            <div class="recuperar-footer">
+                <a href="{{ url_for('cadastro') }}" class="link-voltar">← Voltar para o Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{#
+   CSS exclusivo da página.
+#}
+<style>
+.recuperar-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1.5rem 5rem;
+    min-height: calc(100vh - 250px);
+}
+
+.recuperar-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(106, 27, 154, 0.09);
+    max-width: 500px;
+    width: 100%;
+    padding: 2.5rem 2.2rem;
+    position: relative;
+}
+
+.recuperar-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.recuperar-icon {
+    font-size: 2.5rem;
+    display: inline-block;
+    margin-bottom: 0.6rem;
+}
+
+.recuperar-header h2 {
+    color: var(--purple-dark);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.recuperar-header p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.recuperar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group-recup {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-recup label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.input-recup {
+    width: 100%;
+    padding: 0.8rem 1.1rem;
+    border: 1px solid #d1c4e9;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+    background: #fdfcff;
+}
+
+.input-recup:focus {
+    border-color: var(--purple-main);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+    background: #fff;
+}
+
+.aviso-seguranca-box {
+    background: #fbf9fd;
+    border-left: 4px solid var(--purple-light);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.aviso-seguranca-box .icon {
+    font-size: 1.2rem;
+    line-height: 1.2;
+}
+
+.aviso-seguranca-box strong {
+    font-size: 0.85rem;
+    color: var(--purple-dark);
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.aviso-seguranca-box p {
+    font-size: 0.82rem;
+    color: var(--text-body);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.btn-recuperar-proximo {
+    background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-mid) 100%);
+    color: #fff;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(106, 27, 154, 0.25);
+    transition: var(--transition);
+    margin-top: 0.5rem;
+}
+
+.btn-recuperar-proximo:hover {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 27, 154, 0.35);
+}
+
+.recuperar-footer {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.link-voltar {
+    color: var(--purple-main);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.link-voltar:hover {
+    text-decoration: underline;
+    color: var(--purple-dark);
+}
+</style>
+{% endblock %}

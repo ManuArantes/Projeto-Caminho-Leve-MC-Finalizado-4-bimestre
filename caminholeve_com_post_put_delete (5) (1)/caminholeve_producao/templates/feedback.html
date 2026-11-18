@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{#
+   feedback.html — FORMULÁRIO DE FEEDBACK DA COMUNIDADE
+   Permite que qualquer visitante ou membro envie sugestões, críticas ou elogios.
+   Os feedbacks enviados são armazenados e lidos exclusivamente pelo Administrador no Painel ADM.
+#}
+{% block conteudo %}
+
+<div class="auth-wrapper" style="max-width: 680px; margin: 2.5rem auto; padding: 0 1rem;">
+    <div class="auth-card" style="box-shadow: 0 8px 30px rgba(106, 27, 154, 0.12); border-radius: 16px; border: 1px solid rgba(106, 27, 154, 0.12);">
+        
+        <!-- Header do Card -->
+        <div class="auth-header" style="text-align: center; padding-bottom: 1.2rem;">
+            <span class="auth-logo" style="font-size: 2.5rem;">💌</span>
+            <h2 style="font-size: 1.8rem; color: var(--purple-dark); margin: 0.5rem 0;">Envie seu Feedback</h2>
+            <p style="color: #666; font-size: 0.95rem; line-height: 1.5; max-width: 480px; margin: 0 auto;">
+                Sua opinião, dúvida ou sugestão nos ajuda a tornar este espaço cada dia mais acolhedor e informativo.
+            </p>
+        </div>
+
+        <div class="auth-body" style="padding: 1rem 1.8rem 2rem;">
+            
+            <div style="background: rgba(106, 27, 154, 0.05); border-left: 4px solid var(--purple-main); padding: 0.85rem 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.88rem; color: #444;">
+                🔒 <strong>Privacidade Garantida:</strong> As mensagens enviadas por aqui <em>não são publicadas no site</em>. Elas chegam diretamente à equipe de administração no Painel ADM.
+            </div>
+
+            <form method="POST" action="{{ url_for('feedback_enviar') }}">
+                
+                <div class="auth-group" style="margin-bottom: 1.2rem;">
+                    <label for="fb-nome" style="display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--purple-dark);">
+                        Seu Nome ou Apelido <span style="color: #e53935;">*</span>
+                    </label>
+                    <input type="text" id="fb-nome" name="nome" 
+                           placeholder="Como gostaria de ser chamado(a)" 
+                           value="{{ session.get('usuario_nome', '') }}" 
+                           required minlength="2" maxlength="100"
+                           style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; font-family: inherit; transition: border-color 0.2s;">
+                </div>
+
+                <div class="auth-group" style="margin-bottom: 1.5rem;">
+                    <label for="fb-texto" style="display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--purple-dark);">
+                        Sua Mensagem / Feedback <span style="color: #e53935;">*</span>
+                    </label>
+                    <textarea id="fb-texto" name="texto" rows="6" 
+                              placeholder="Escreva aqui sua sugestão, elogio, relato ou crítica construtiva..." 
+                              required minlength="5" maxlength="3000"
+                              style="width: 100%; padding: 0.85rem 1rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; font-family: inherit; line-height: 1.5; resize: vertical; transition: border-color 0.2s;"></textarea>
+                    <small style="display: block; color: #777; font-size: 0.8rem; margin-top: 0.3rem;">
+                        Compartilhe suas ideias sobre navegação, conteúdos de Miastenia Congênita, acessibilidade ou melhorias no fórum.
+                    </small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end; margin-top: 1rem;">
+                    <a href="{{ url_for('principal') }}" style="color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn auth-btn-submit" style="background: linear-gradient(135deg, var(--purple-main), var(--purple-dark)); color: #fff; padding: 0.75rem 1.8rem; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(106, 27, 154, 0.25);">
+                        Enviar Feedback ✉️
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

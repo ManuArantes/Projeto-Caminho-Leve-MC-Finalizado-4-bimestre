@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{#
+   referencia.html — REFERÊNCIAS BIBLIOGRÁFICAS E LGPD
+   Página estática com as fontes consultadas, as diretrizes de conduta da plataforma e a explicação sobre a
+   LGPD (Lei Geral de Proteção de Dados). O formulário de cadastro tem um checkbox que remete a esta página.
+#}
+{% block conteudo %}
+
+<!-- HERO -->
+<section class="ref-hero">
+    <div class="ref-hero-content">
+        <div class="hero-badge">📚 Transparência & Fundamentos</div>
+        <h2 class="hero-title">Referências & LGPD</h2>
+        <p class="hero-desc">
+            Todas as fontes científicas e legais que embasam este projeto, junto às diretrizes
+            de <strong>proteção de dados</strong> seguidas pelo Caminho Leve MC.
+        </p>
+        <div class="hero-tags">
+            <span class="tag">🔬 Embasamento científico</span>
+            <span class="tag">⚖️ LGPD</span>
+            <span class="tag">🔒 Dados protegidos</span>
+            <a href="#feedback" class="tag" style="text-decoration: none; color: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">💌 Enviar Feedback</a>
+        </div>
+    </div>
+    <div class="ref-hero-deco">
+        <div class="deco-circle c1">📚</div>
+        <div class="deco-circle c2">⚖️</div>
+        <div class="deco-circle c3">🔒</div>
+    </div>
+</section>
+
+{#
+   Lista de referências por categoria.
+#}
+<!-- ===== REFERÊNCIAS ===== -->
+<section class="ref-section">
+    <div class="ref-section-header">
+        <span class="ref-section-icon">📖</span>
+        <div>
+            <h2 class="ref-section-title">Referências Bibliográficas</h2>
+            <p class="ref-section-sub">Fontes científicas, acadêmicas e institucionais que fundamentam o conteúdo deste
+                site.</p>
+        </div>
+    </div>
+
+    <div class="ref-categorias">
+
+        <!-- Categoria: Miastenia Congênita -->
+        <div class="ref-categoria">
+            <h3 class="ref-cat-titulo">🧬 Miastenia Congênita</h3>
+            <ul class="ref-lista">
+                <li class="ref-item">
+                    <div class="ref-item-icon">📰</div>
+                    <div class="ref-item-conteudo">
+                        <a href="https://www.scielo.br/j/anp/a/JW4v4hkFCxv8GKHwtCxJmMr/?format=html&lang=pt"
+                            target="_blank" rel="noopener noreferrer" class="ref-link">
+                            Estudo neurofisiológico na síndrome miastênica congênita do canal lento: relato de caso.
+                        </a>
+                        <p class="ref-meta">LORENZONI et al. — <em>Arquivos de Neuro-Psiquiatria</em>, v. 64, n. 2A,
+                            2006. SciELO.</p>
+                    </div>
+                    <a href="https://www.scielo.br/j/anp/a/JW4v4hkFCxv8GKHwtCxJmMr/?format=html&lang=pt" target="_blank"
+                        rel="noopener noreferrer" class="ref-btn">Acessar →</a>
+                </li>
+
+                <li class="ref-item">
+                    <div class="ref-item-icon">📰</div>
+                    <div class="ref-item-conteudo">
+                        <a href="https://www.scielo.br/j/rpp/a/HtpxhKYDYKZhw96MLzTL9dG/?format=pdf&lang=pt"
+                            target="_blank" rel="noopener noreferrer" class="ref-link">
+                            Evento com aparente risco de morte recorrente como manifestação inicial de síndrome
+                            miastênica congênita.
+                        </a>
+                        <p class="ref-meta">ROMANELI et al. — <em>Revista Paulista de Pediatria</em>, v. 31, n. 1, 2013.
+                            SciELO.</p>
+                    </div>
+                    <a href="https://www.scielo.br/j/rpp/a/HtpxhKYDYKZhw96MLzTL9dG/?format=pdf&lang=pt" target="_blank"
+                        rel="noopener noreferrer" class="ref-btn">Acessar →</a>
+                </li>
+
+                <li class="ref-item">
+                    <div class="ref-item-icon">🌐</div>
+                    <div class="ref-item-conteudo">
+                        <a href="https://www.walkiriabrunetti.com.br/single-post/o-que-%C3%A9-miastenia-cong%C3%AAnita"
+                            target="_blank" rel="noopener noreferrer" class="ref-link">
+                            O que é miastenia congênita? Conheça melhor os sinais e sintomas da doença.
+                        </a>
+                        <p class="ref-meta">BRUNETTI, W. — walkiriabrunetti.com.br</p>
+                    </div>
+                    <a href="https://www.walkiriabrunetti.com.br/single-post/o-que-%C3%A9-miastenia-cong%C3%AAnita"
+                        target="_blank" rel="noopener noreferrer" class="ref-btn">Acessar →</a>
+                </li>
+
+                <li class="ref-item">
+                    <div class="ref-item-icon">🏛️</div>
+                    <div class="ref-item-conteudo">
+                        <a href="https://www.abrami.org.br/index.php" target="_blank" rel="noopener noreferrer"
+                            class="ref-link">
+                            Associação Brasileira dos Portadores de Miastenia Gravis — ABRAMI
+                        </a>
+                        <p class="ref-meta">abrami.org.br — Entidade de apoio e informação.</p>
+                    </div>
+                    <a href="https://www.abrami.org.br/index.php" target="_blank" rel="noopener noreferrer"
+                        class="ref-btn">Acessar →</a>
+                </li>
+            </ul>
+        </div>
+
+
+
+    </div>
+</section>
+
+
+
+
+{#
+   Seção de LGPD: conduta, aceite e cartões explicando direitos do titular, finalidade, consentimento etc.
+#}
+<!-- ===== LGPD ===== -->
+<section class="lgpd-section">
+
+
+    {#
+       Regras de convivência da comunidade (respeito, sem diagnóstico entre usuários etc.).
+    #}
+    <!-- Diretrizes de conduta -->
+    <div class="lgpd-conduta">
+        <h3 class="lgpd-conduta-titulo">📋 Diretrizes de Conduta na Plataforma</h3>
+        <p class="lgpd-conduta-desc">O Caminho Leve MC é um espaço de cuidado. Todas as interações devem seguir estas
+            regras:</p>
+        <ul class="lgpd-regras">
+            <li class="lgpd-regra">
+                <span class="lgpd-regra-icon ok">🙌</span>
+                <div>
+                    <strong>Respeito e empatia:</strong>
+                    O fórum e os relatos devem ser mantidos com cordialidade, solidariedade e respeito mútuo.
+                </div>
+            </li>
+            <li class="lgpd-regra">
+                <span class="lgpd-regra-icon proibido">🚫</span>
+                <div>
+                    <strong>Conteúdo proibido:</strong>
+                    Não são permitidas publicações ofensivas, preconceituosas, discriminatórias ou que exponham dados
+                    pessoais de terceiros.
+                </div>
+            </li>
+            <li class="lgpd-regra">
+                <span class="lgpd-regra-icon aviso">⚖️</span>
+                <div>
+                    <strong>Moderação:</strong>
+                    Comentários que violem as diretrizes poderão ser removidos pela moderação, e o usuário notificado
+                    conforme o Art. 6º da LGPD (Transparência).
+                </div>
+            </li>
+            <li class="lgpd-regra">
+                <span class="lgpd-regra-icon ok">📘</span>
+                <div>
+                    <strong>Finalidade informativa:</strong>
+                    O conteúdo do site é informativo e não substitui orientação médica profissional. Dados de saúde são
+                    tratados com máxima confidencialidade (Art. 11, LGPD).
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Aceite -->
+    <div class="lgpd-aceite">
+        <span class="lgpd-aceite-icon">✍️</span>
+        <p>
+            Ao realizar seu cadastro no Caminho Leve MC, você declara ter lido e concordado com todas as diretrizes
+            acima, em conformidade com o <strong>Art. 8º da Lei nº 13.709/2018 (LGPD)</strong>.
+        </p>
+    </div>
+    <div class=""><br></div>
+
+
+
+    <!-- Banner LGPD -->
+    <div class="lgpd-banner">
+        <div class="lgpd-banner-icon">⚖️</div>
+        <div class="lgpd-banner-texto">
+            <h2 class="lgpd-banner-titulo">Lei Geral de Proteção de Dados</h2>
+            <p>Este site está em conformidade com a <strong>LGPD — Lei nº 13.709/2018</strong>, que regula o tratamento
+                de dados pessoais no Brasil.</p>
+        </div>
+        <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank"
+            rel="noopener noreferrer" class="lgpd-banner-btn">Ver lei completa →</a>
+    </div>
+
+    <!-- Cards LGPD -->
+    <div class="lgpd-grid">
+
+        <div class="lgpd-card lgpd-card--azul">
+            <div class="lgpd-card-icon">🔒</div>
+            <h3>Proteção de Dados Sensíveis</h3>
+            <p>Nenhum dado sensível como CPF, endereço ou informações de saúde identificáveis será exibido publicamente
+                ou compartilhado com terceiros sem consentimento expresso.</p>
+        </div>
+
+        <div class="lgpd-card lgpd-card--roxo">
+            <div class="lgpd-card-icon">📑</div>
+            <h3>Finalidade do Tratamento</h3>
+            <p>As informações fornecidas pelos usuários são armazenadas exclusivamente para fins de
+                <strong>autenticação, controle de publicações</strong> e melhoria da experiência na plataforma.
+            </p>
+        </div>
+
+        <div class="lgpd-card lgpd-card--verde">
+            <div class="lgpd-card-icon">✅</div>
+            <h3>Consentimento Explícito</h3>
+            <p>Ao se cadastrar, o usuário consente expressamente com o uso de seus dados conforme descrito nesta
+                política. O consentimento pode ser revogado a qualquer momento mediante solicitação.</p>
+        </div>
+
+        <div class="lgpd-card lgpd-card--amarelo">
+            <div class="lgpd-card-icon">🙋</div>
+            <h3>Direitos do Titular</h3>
+            <p>Você tem direito de <strong>acessar, corrigir, excluir ou portar</strong> seus dados pessoais conforme o
+                Art. 18 da LGPD. Solicite via contato com a administração do site.</p>
+        </div>
+
+        <div class="lgpd-card lgpd-card--vermelho">
+            <div class="lgpd-card-icon">🚫</div>
+            <h3>Uso Indevido de Dados</h3>
+            <p>É proibida qualquer tentativa de expor dados pessoais de outros usuários. Publicações que violem a
+                privacidade de terceiros serão removidas e o usuário poderá ser banido.</p>
+        </div>
+
+        <div class="lgpd-card lgpd-card--cinza">
+            <div class="lgpd-card-icon">📬</div>
+            <h3>Contato do Responsável</h3>
+            <p>Dúvidas sobre privacidade ou solicitação de direitos podem ser enviadas à equipe do Caminho Leve MC.
+                Respondemos em até <strong>15 dias úteis</strong>, conforme a lei.</p>
+        </div>
+
+    </div>
+
+
+</section>
+
+<!-- ===== FEEDBACK DA COMUNIDADE ===== -->
+<section class="ref-section" id="feedback" style="scroll-margin-top: 5rem; margin-top: 3.5rem;">
+    <div class="ref-section-header">
+        <span class="ref-section-icon">💌</span>
+        <div>
+            <h2 class="ref-section-title">Envie seu Feedback</h2>
+            <p class="ref-section-sub">Sua opinião, dúvida ou sugestão nos ajuda a tornar este espaço cada dia mais acolhedor e informativo.</p>
+        </div>
+    </div>
+
+    <div class="ref-categoria" style="max-width: 700px; margin: 0 auto; box-shadow: 0 8px 30px rgba(106, 27, 154, 0.1); border-radius: 16px; border: 1px solid rgba(106, 27, 154, 0.12); padding: 2rem;">
+        
+        <div style="background: rgba(106, 27, 154, 0.05); border-left: 4px solid var(--purple-main); padding: 0.85rem 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.88rem; color: #444;">
+            🔒 <strong>Privacidade Garantida:</strong> As mensagens enviadas por aqui <em>não são publicadas no site</em>. Elas chegam diretamente à equipe de administração no Painel ADM.
+        </div>
+
+        <form method="POST" action="{{ url_for('feedback_enviar') }}">
+            
+            <div class="auth-group" style="margin-bottom: 1.2rem;">
+                <label for="fb-nome" style="display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--purple-dark);">
+                    Seu Nome ou Apelido <span style="color: #e53935;">*</span>
+                </label>
+                <input type="text" id="fb-nome" name="nome" 
+                       placeholder="Como gostaria de ser chamado(a)" 
+                       value="{{ session.get('usuario_nome', '') }}" 
+                       required minlength="2" maxlength="100"
+                       style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; font-family: inherit; transition: border-color 0.2s; box-sizing: border-box;">
+            </div>
+
+            <div class="auth-group" style="margin-bottom: 1.5rem;">
+                <label for="fb-texto" style="display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--purple-dark);">
+                    Sua Mensagem / Feedback <span style="color: #e53935;">*</span>
+                </label>
+                <textarea id="fb-texto" name="texto" rows="5" 
+                          placeholder="Escreva aqui sua sugestão, elogio, relato ou crítica construtiva..." 
+                          required minlength="5" maxlength="3000"
+                          style="width: 100%; padding: 0.85rem 1rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; font-family: inherit; line-height: 1.5; resize: vertical; transition: border-color 0.2s; box-sizing: border-box;"></textarea>
+                <small style="display: block; color: #777; font-size: 0.8rem; margin-top: 0.3rem;">
+                    Compartilhe suas ideias sobre navegação, conteúdos de Miastenia Congênita, acessibilidade ou melhorias no fórum.
+                </small>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end; margin-top: 1.2rem;">
+                <button type="submit" class="btn auth-btn-submit" style="width: auto; min-width: 180px; background: linear-gradient(135deg, var(--purple-main), var(--purple-dark)); color: #fff; padding: 0.75rem 1.8rem; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(106, 27, 154, 0.25);">
+                    Enviar Feedback ✉️
+                </button>
+            </div>
+
+        </form>
+    </div>
+</section>
+
+{% endblock %}

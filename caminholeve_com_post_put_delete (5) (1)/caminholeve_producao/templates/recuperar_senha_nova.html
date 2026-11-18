@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{#
+   recuperar_senha_nova.html — PASSO 3 DE 3: definir a nova senha
+   Só abre se o passo 2 foi aprovado (o Controller confere a session). Validação no navegador via validarNovaSenhaForm().
+#}
+{% block conteudo %}
+<div class="recuperar-wrapper">
+    <div class="recuperar-card">
+        <div class="recuperar-header">
+            <span class="recuperar-icon">🎉</span>
+            <h2>Definir Nova Senha</h2>
+            <p>Sua identidade foi validada com sucesso! Crie agora a nova senha de acesso para <strong>{{ email }}</strong>.</p>
+        </div>
+
+        <form action="{{ url_for('recuperar_senha_nova_senha') }}" method="POST" class="recuperar-form" onsubmit="return validarNovaSenhaForm();">
+            <div class="form-group-recup">
+                <label for="nova_senha">Nova Senha <span class="required">*</span></label>
+                <input type="password" id="nova_senha" name="nova_senha" required minlength="6" 
+                       placeholder="Crie uma nova senha forte" class="input-recup">
+                <small style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                    🔒 Mínimo 6 caracteres, com pelo menos 1 letra maiúscula (A-Z) e 1 número (0-9).
+                </small>
+            </div>
+
+            <div class="form-group-recup">
+                <label for="confirmar_nova_senha">Confirmar Nova Senha <span class="required">*</span></label>
+                <input type="password" id="confirmar_nova_senha" name="confirmar_nova_senha" required minlength="6" 
+                       placeholder="Repita exatamente a nova senha" class="input-recup">
+            </div>
+
+            <div id="erroSenhaMsg" style="display: none; color: #c62828; font-size: 0.88rem; font-weight: 600;"></div>
+
+            <button type="submit" class="btn-recuperar-proximo">
+                Salvar Nova Senha e Concluir 🔒
+            </button>
+        </form>
+    </div>
+</div>
+
+{#
+   CSS exclusivo da página.
+#}
+<style>
+.recuperar-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1.5rem 5rem;
+    min-height: calc(100vh - 250px);
+}
+
+.recuperar-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(106, 27, 154, 0.09);
+    max-width: 500px;
+    width: 100%;
+    padding: 2.5rem 2.2rem;
+}
+
+.recuperar-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.recuperar-icon {
+    font-size: 2.5rem;
+    display: inline-block;
+    margin-bottom: 0.6rem;
+}
+
+.recuperar-header h2 {
+    color: var(--purple-dark);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.recuperar-header p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.recuperar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group-recup {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-recup label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.form-group-recup label .required {
+    color: #e53935;
+}
+
+.input-recup {
+    width: 100%;
+    padding: 0.8rem 1.1rem;
+    border: 1px solid #d1c4e9;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+    background: #fdfcff;
+}
+
+.input-recup:focus {
+    border-color: var(--purple-main);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.12);
+    background: #fff;
+}
+
+.btn-recuperar-proximo {
+    background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-mid) 100%);
+    color: #fff;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(106, 27, 154, 0.25);
+    transition: var(--transition);
+    margin-top: 0.5rem;
+}
+
+.btn-recuperar-proximo:hover {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 27, 154, 0.35);
+}
+</style>
+
+{#
+   JavaScript da página.
+#}
+<script>
+// Confere regras da senha (6+ caracteres, 1 maiúscula, 1 número) e se as duas digitações são iguais; retorna false para impedir o envio.
+function validarNovaSenhaForm() {
+    const s1 = document.getElementById('nova_senha').value;
+    const s2 = document.getElementById('confirmar_nova_senha').value;
+    const msg = document.getElementById('erroSenhaMsg');
+
+    if (s1.length < 6) {
+        msg.textContent = 'A nova senha deve ter no mínimo 6 caracteres.';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    if (!/[A-Z]/.test(s1)) {
+        msg.textContent = 'A nova senha deve conter pelo menos uma letra maiúscula (A-Z).';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    if (!/[0-9]/.test(s1)) {
+        msg.textContent = 'A nova senha deve conter pelo menos um número (0-9).';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    if (s1 !== s2) {
+        msg.textContent = 'A confirmação não confere com a nova senha.';
+        msg.style.display = 'block';
+        return false;
+    }
+
+    msg.style.display = 'none';
+    return true;
+}
+</script>
+{% endblock %}

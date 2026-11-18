@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{#
+   recuperar_senha_bloqueado.html — TELA DE CONTA BLOQUEADA
+   Exibida após 3 respostas erradas nas perguntas de segurança. Orienta a escrever para o administrador,
+   que pode reativar a conta pelo Painel ADM (isso também zera o contador de erros).
+#}
+{% block conteudo %}
+<div class="bloqueado-wrapper">
+    <div class="bloqueado-card">
+        <div class="bloqueado-icone">🚨</div>
+        <h2>Conta Bloqueada por Segurança</h2>
+        <p class="bloqueado-subtitulo">
+            O limite de <strong>3 tentativas incorretas</strong> para responder às perguntas de segurança foi atingido.
+        </p>
+
+        <div class="bloqueado-info-box">
+            <h4>🔒 Por que isso aconteceu?</h4>
+            <p>
+                Para proteger seus dados cadastrais e evitar acessos não autorizados, o sistema trava automaticamente qualquer conta após 3 respostas incorretas sucessivas.
+            </p>
+        </div>
+
+        <div class="bloqueado-instrucao-box">
+            <h4>📩 Como desbloquear sua conta?</h4>
+            <p>
+                Você deve entrar em contato direto com o <strong>Administrador do Sistema</strong> pelo e-mail oficial:
+            </p>
+            <div class="admin-email-highlight">
+                <a href="mailto:admin@caminholeve.com?subject=Solicitacao%20de%20Desbloqueio%20de%20Conta%20-%20Caminho%20Leve%20MC" class="link-admin-mail">
+                    ✉️ admin@caminholeve.com
+                </a>
+            </div>
+            <p class="instrucao-nota">
+                No e-mail, informe seu <strong>nome completo</strong> e o <strong>e-mail cadastrado</strong> para que o administrador possa verificar sua identidade e reativar sua conta.
+            </p>
+        </div>
+
+        <div class="bloqueado-botoes">
+            <a href="mailto:admin@caminholeve.com?subject=Solicitacao%20de%20Desbloqueio%20de%20Conta%20-%20Caminho%20Leve%20MC" class="btn-enviar-email">
+                ✉️ Enviar E-mail ao Administrador
+            </a>
+            <a href="{{ url_for('principal') }}" class="btn-voltar-home">
+                Voltar à Página Principal
+            </a>
+        </div>
+    </div>
+</div>
+
+{#
+   CSS exclusivo da página.
+#}
+<style>
+.bloqueado-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1.5rem 5rem;
+    min-height: calc(100vh - 250px);
+}
+
+.bloqueado-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px rgba(183, 28, 28, 0.12);
+    border: 1px solid #ffcdd2;
+    border-top: 6px solid #d32f2f;
+    max-width: 580px;
+    width: 100%;
+    padding: 2.8rem 2.2rem;
+    text-align: center;
+}
+
+.bloqueado-icone {
+    font-size: 3.2rem;
+    line-height: 1;
+    margin-bottom: 0.8rem;
+}
+
+.bloqueado-card h2 {
+    color: #b71c1c;
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.bloqueado-subtitulo {
+    color: var(--text-body);
+    font-size: 0.98rem;
+    margin-bottom: 1.8rem;
+    line-height: 1.5;
+}
+
+.bloqueado-info-box {
+    background: #fffbfa;
+    border: 1px solid #ffcdd2;
+    border-radius: var(--radius-sm);
+    padding: 1.1rem 1.3rem;
+    text-align: left;
+    margin-bottom: 1.25rem;
+}
+
+.bloqueado-info-box h4 {
+    color: #c62828;
+    font-size: 0.95rem;
+    margin: 0 0 0.4rem;
+}
+
+.bloqueado-info-box p {
+    color: var(--text-body);
+    font-size: 0.88rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.bloqueado-instrucao-box {
+    background: #f8f4fc;
+    border: 1px solid #e1bee7;
+    border-radius: var(--radius-sm);
+    padding: 1.3rem 1.4rem;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.bloqueado-instrucao-box h4 {
+    color: var(--purple-dark);
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+}
+
+.bloqueado-instrucao-box p {
+    color: var(--text-body);
+    font-size: 0.9rem;
+    margin: 0 0 0.8rem;
+    line-height: 1.5;
+}
+
+.admin-email-highlight {
+    background: #fff;
+    border: 1px dashed var(--purple-main);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    margin: 0.6rem 0 0.9rem;
+}
+
+.link-admin-mail {
+    color: var(--purple-dark);
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+
+.link-admin-mail:hover {
+    color: var(--purple-main);
+    text-decoration: underline;
+}
+
+.instrucao-nota {
+    font-size: 0.82rem !important;
+    color: var(--text-muted) !important;
+    margin: 0 !important;
+}
+
+.bloqueado-botoes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-enviar-email {
+    background: #d32f2f;
+    color: #fff;
+    padding: 0.85rem 1.5rem;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.98rem;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.25);
+    display: block;
+}
+
+.btn-enviar-email:hover {
+    background: #b71c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(183, 28, 28, 0.35);
+}
+
+.btn-voltar-home {
+    background: #ede7f6;
+    color: var(--purple-dark);
+    padding: 0.75rem 1.5rem;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: var(--transition);
+    display: block;
+}
+
+.btn-voltar-home:hover {
+    background: #e1bee7;
+}
+</style>
+{% endblock %}

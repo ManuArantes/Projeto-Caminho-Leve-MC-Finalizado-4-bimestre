@@ -1,0 +1,243 @@
+
+{% extends "base.html" %}
+
+{#
+   cadastro.html — TELA DE ENTRAR / CRIAR CONTA
+   Uma única página com DUAS abas (formulários): 'Entrar' (login) e 'Criar Conta' (cadastro).
+   O JS no final alterna entre elas sem recarregar a página.
+   Envio: login -> POST /login  |  cadastro -> POST /realizar_cadastro  (rotas do app.py).
+#}
+{% block conteudo %}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        
+        <!-- Header do Card -->
+        <div class="auth-header">
+            <span class="auth-logo">🫶</span>
+            <h2>Caminho Leve MC</h2>
+            <p>Acolhimento & Informação sobre Miastenia Congênita</p>
+        </div>
+
+        <!-- Por que criar uma conta? -->
+        <div class="auth-body">
+            <h3 style="color: var(--purple-dark); margin-bottom: 0.8rem; font-size: 1.2rem;">
+                Por que criar uma conta?
+            </h3>
+
+            <p style="margin-bottom: 0.8rem;">
+                Qualquer pessoa pode ler sobre a Miastenia Congênita no Caminho Leve MC, mas é com o cadastro que o site passa de um lugar de leitura a um lugar de acolhimento. Com a conta, você pode participar do Fórum, compartilhar o seu relato, ler as experiências de outras pessoas, comentar para demonstrar apoio e sugerir artigos para a página de Artigos Médicos.
+            </p>
+
+            <p style="margin-bottom: 0.8rem;">
+                Ter um cadastro também ajuda a manter o ambiente seguro. Como só quem tem conta participa das conversas, é mais fácil cuidar para que o espaço continue respeitoso, de acordo com as diretrizes de uso.
+            </p>
+
+            <p style="margin-bottom: 0.8rem;">
+                E a sua privacidade vem em primeiro lugar. Nas publicações, você aparece apenas pelo nickname que escolher. Seus dados pessoais não ficam visíveis para ninguém e só os administradores autorizados têm acesso a eles, seguindo a Lei Geral de Proteção de Dados (LGPD).
+            </p>
+
+            <p>
+                Se você vive com a doença, cuida de alguém que vive ou quer entender melhor, o cadastro é o primeiro passo para encontrar quem entende o que você sente.
+            </p>
+        </div>
+
+        {#
+           Botões das duas abas; o onclick chama alternarAuth() (JS no fim do arquivo).
+        #}
+        <!-- Abas -->
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-login" onclick="alternarAuth('login')">Entrar</button>
+            <button class="auth-tab-btn" id="tab-cadastro" onclick="alternarAuth('cadastro')">Criar Conta</button>
+        </div>
+
+        <!-- Corpo do Card -->
+        <div class="auth-body">
+            
+            <!-- Formulário de Login -->
+            {#
+               FORMULÁRIO DE LOGIN: method=post + action=/login. Os atributos name (email, senha) são as chaves lidas no Controller com request.form.get().
+            #}
+            <form id="form-login" class="auth-form active" method="post" action="/login">
+                <div class="auth-group">
+                    <label for="login-email">E-mail</label>
+                    <input type="email" id="login-email" name="email" placeholder="seuemail@exemplo.com" required>
+                </div>
+                
+                <div class="auth-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <label for="login-senha" style="margin-bottom: 0;">Senha</label>
+                        <a href="{{ url_for('recuperar_senha') }}" class="auth-link-esqueci" style="font-size: 0.82rem; color: var(--purple-main); text-decoration: none; font-weight: 600;">Esqueceu a senha?</a>
+                    </div>
+                    <input type="password" id="login-senha" name="senha" placeholder="Digite sua senha" required>
+                </div>
+
+                <button type="submit" class="btn auth-btn-submit">
+                    Acessar Portal
+                </button>
+
+                <div class="auth-footer">
+                    Não tem uma conta? <a class="auth-link" onclick="alternarAuth('cadastro')">Cadastre-se aqui</a>
+                </div>
+            </form>
+
+            <!-- Formulário de Cadastro -->
+            {#
+               FORMULÁRIO DE CADASTRO. Os atributos 'required' e 'minlength' são validação do NAVEGADOR; as validações reais ficam no Service (Python).
+            #}
+            <form id="form-cadastro" class="auth-form" method="post" action="/realizar_cadastro">
+                <div class="auth-group">
+                    <label for="cad-nome">Nome Completo</label>
+                    <input type="text" id="cad-nome" name="nome" placeholder="Digite seu nome completo" required>
+                </div>
+
+                {#
+                   APELIDO (nickname): é o nome que aparece publicamente no fórum, nas respostas e nos relatos.
+                   O pattern repete a regra do Service (3 a 30 caracteres: letras, números, . - _ sem espaços).
+                #}
+                <div class="auth-group">
+                    <label for="cad-nickname">Apelido (nickname)</label>
+                    <input type="text" id="cad-nickname" name="nickname" placeholder="Como você quer aparecer no site"
+                        required minlength="3" maxlength="30" pattern="[A-Za-zÀ-ÿ0-9._\-]{3,30}"
+                        title="De 3 a 30 caracteres: letras, números, ponto, hífen ou underline, sem espaços.">
+                    <small class="form-hint">É este nome que aparece nas suas publicações, respostas e relatos. Seu nome completo não é exibido.</small>
+                </div>
+
+                <div class="auth-group">
+                    <label for="cad-email">E-mail</label>
+                    <input type="email" id="cad-email" name="email" placeholder="seuemail@exemplo.com" required>
+                </div>
+
+                <div class="auth-group">
+                    <label for="cad-perfil">Seu Perfil</label>
+                    <select id="cad-perfil" name="perfil" required>
+                        <option value="" disabled selected>Selecione seu perfil...</option>
+                        <option value="Portador">Portador</option>
+                        <option value="Familiar">Familiar</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+
+                <div class="auth-row">
+                    <div class="auth-group" style="flex: 1;">
+                        <label for="cad-cidade">Cidade</label>
+                        <input type="text" id="cad-cidade" name="cidade" placeholder="Sua cidade">
+                    </div>
+                    <div class="auth-group" style="flex: 0 0 100px;">
+                        <label for="cad-estado">Estado</label>
+                        <input type="text" id="cad-estado" name="estado" placeholder="UF" maxlength="2">
+                    </div>
+                </div>
+
+                <div class="auth-group">
+                    <label for="cad-nascimento">Data de Nascimento</label>
+                    <input type="date" id="cad-nascimento" name="nascimento">
+                </div>
+                
+                <div class="auth-group">
+                    <label for="cad-senha">Senha</label>
+                    <input type="password" id="cad-senha" name="senha" placeholder="Crie uma senha forte" minlength="6" required>
+                    <small style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; display: block; line-height: 1.3;">
+                        🔒 Mínimo 6 caracteres, com pelo menos 1 letra maiúscula (A-Z) e 1 número (0-9).
+                    </small>
+                </div>
+
+                <div class="auth-group">
+                    <label for="cad-confirmar">Confirmar Senha</label>
+                    <input type="password" id="cad-confirmar" name="confirmar_senha" placeholder="Repita a senha criada" required>
+                </div>
+
+                <div class="auth-checkbox-group">
+                    <input type="checkbox" id="cad-termos" name="termos" required>
+                    <label for="cad-termos">
+                        Declaro que li e aceito as <a href="{{ url_for('referencia') }}" target="_blank">Políticas de Privacidade e LGPD</a> do portal.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn auth-btn-submit">
+                    Criar Minha Conta
+                </button>
+
+                <div class="auth-footer">
+                    Já possui conta? <a class="auth-link" onclick="alternarAuth('login')">Acesse aqui</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{#
+   Início do JavaScript desta página.
+#}
+<script>
+    // Troca a aba ativa: mostra o formulário escolhido (classe CSS 'active') e esconde o outro.
+    function alternarAuth(tipo) {
+        const tabLogin = document.getElementById('tab-login');
+        const tabCadastro = document.getElementById('tab-cadastro');
+        const formLogin = document.getElementById('form-login');
+        const formCadastro = document.getElementById('form-cadastro');
+
+        if (tipo === 'login') {
+            tabLogin.classList.add('active');
+            tabCadastro.classList.remove('active');
+            formLogin.classList.add('active');
+            formCadastro.classList.remove('active');
+        } else {
+            tabCadastro.classList.add('active');
+            tabLogin.classList.remove('active');
+            formCadastro.classList.add('active');
+            formLogin.classList.remove('active');
+        }
+    }
+
+    // Se a URL tiver ?tab=cadastro (o Controller redireciona assim após erro de cadastro), abre direto a aba 'Criar Conta'.
+    // Verificar se há aba ativa na URL
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'cadastro') {
+            alternarAuth('cadastro');
+        }
+    });
+
+    // Validação no navegador (senha com 6+ caracteres, 1 maiúscula, 1 número e confirmação igual) para dar retorno rápido. O Python repete as regras por segurança.
+    // Validação client-side para requisitos e conferência de senhas
+    const formCad = document.getElementById('form-cadastro');
+    const senha = document.getElementById('cad-senha');
+    const confirmar = document.getElementById('cad-confirmar');
+
+    formCad.addEventListener('submit', function(e) {
+        const valSenha = senha.value;
+        const valConf = confirmar.value;
+
+        if (valSenha.length < 6) {
+            e.preventDefault();
+            alert('A senha deve ter no mínimo 6 caracteres.');
+            senha.focus();
+            return;
+        }
+
+        if (!/[A-Z]/.test(valSenha)) {
+            e.preventDefault();
+            alert('A senha deve conter pelo menos uma letra maiúscula (A-Z).');
+            senha.focus();
+            return;
+        }
+
+        if (!/[0-9]/.test(valSenha)) {
+            e.preventDefault();
+            alert('A senha deve conter pelo menos um número (0-9).');
+            senha.focus();
+            return;
+        }
+
+        if (valSenha !== valConf) {
+            e.preventDefault();
+            alert('As senhas não coincidem! Por favor, verifique-as e tente novamente.');
+            confirmar.focus();
+            return;
+        }
+    });
+</script>
+
+{% endblock %}

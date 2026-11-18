@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{#
+principal.html — PÁGINA INICIAL ("O que é Miastenia Congênita?")
+Página 100% informativa: herda o layout do base.html e suporta múltiplos idiomas (PT/ES/EN).
+#}
+{% block conteudo %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-badge">{{ t('hero_badge') }}</div>
+    <h2 class="hero-title">{{ t('hero_title') }}</h2>
+    <p class="hero-desc">
+        {{ t('hero_desc')|safe }}
+    </p>
+
+    <h2 class="hero-title">{{ t('hero_summary_title') }}</h2>
+    <p class="hero-desc">
+        {{ t('hero_summary_desc')|safe }}
+    </p>
+    <div class="hero-tags">
+        <span class="tag">{{ t('tag_genetica') }}</span>
+        <span class="tag">{{ t('tag_rara') }}</span>
+        <span class="tag">{{ t('tag_nascimento') }}</span>
+        <span class="tag">{{ t('tag_tratavel') }}</span>
+    </div>
+</section>
+
+<!-- CARDS GRID -->
+<section class="topicos-section">
+    <div class="grid-topicos">
+
+        <!-- Card 1 -->
+        <article class="card-topico">
+            <div class="card-icon">🧬</div>
+            <h3>{{ t('card1_title') }}</h3>
+            <ul>
+                <li>{{ t('card1_item1')|safe }}</li>
+                <li>{{ t('card1_item2')|safe }}</li>
+                <li>{{ t('card1_item3')|safe }}</li>
+            </ul>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card-topico">
+            <div class="card-icon">🧬</div>
+            <h3>{{ t('card2_title') }}</h3>
+            <ul>
+                <li>{{ t('card2_item1')|safe }}</li>
+                <li>{{ t('card2_item2')|safe }}</li>
+                <li>{{ t('card2_item3')|safe }}</li>
+                <li>{{ t('card2_item4')|safe }}</li>
+                <li>{{ t('card2_item5')|safe }}</li>
+                <li>{{ t('card2_item6')|safe }}</li>
+                <li>{{ t('card2_item7')|safe }}</li>
+                <li>{{ t('card2_item8')|safe }}</li>
+            </ul>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card-topico">
+            <div class="card-icon">🩺</div>
+            <h3>{{ t('card3_title') }}</h3>
+            <ul>
+                <li>{{ t('card3_item1')|safe }}</li>
+                <li>{{ t('card3_item2')|safe }}</li>
+                <li>{{ t('card3_item3')|safe }}</li>
+                <li>{{ t('card3_item4')|safe }}</li>
+                <li>{{ t('card3_item5')|safe }}</li>
+                <li>{{ t('card3_item6')|safe }}</li>
+                <li>{{ t('card3_item7')|safe }}</li>
+                <li>{{ t('card3_item8')|safe }}</li>
+                <li>{{ t('card3_item9')|safe }}</li>
+                <li>{{ t('card3_item10')|safe }}</li>
+            </ul>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card-topico">
+            <div class="card-icon">🔬</div>
+            <h3>{{ t('card4_title') }}</h3>
+            <ul>
+                <li>{{ t('card4_item1')|safe }}</li>
+                <li>{{ t('card4_item2')|safe }}</li>
+                <li>{{ t('card4_item3')|safe }}</li>
+                <li>{{ t('card4_item4')|safe }}</li>
+                <li>{{ t('card4_item5')|safe }}</li>
+                <li>{{ t('card4_item6')|safe }}</li>
+                <li>{{ t('card4_item7')|safe }}</li>
+                <li>{{ t('card4_item8')|safe }}</li>
+            </ul>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="card-topico">
+            <div class="card-icon">💊</div>
+            <h3>{{ t('card5_title') }}</h3>
+            <ul>
+                <li>{{ t('card5_item1')|safe }}</li>
+                <li>{{ t('card5_item2')|safe }}</li>
+                <li>{{ t('card5_item3')|safe }}</li>
+                <li>{{ t('card5_item4')|safe }}</li>
+                <li>{{ t('card5_item5')|safe }}</li>
+                <li>{{ t('card5_item6')|safe }}</li>
+                <li>{{ t('card5_item7')|safe }}</li>
+            </ul>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="card-topico">
+            <div class="card-icon">🤝</div>
+            <h3>{{ t('card6_title') }}</h3>
+            <ul>
+                <li>{{ t('card6_item1')|safe }}</li>
+                <li>{{ t('card6_item2')|safe }}</li>
+                <li>{{ t('card6_item3')|safe }}</li>
+                <li>{{ t('card6_item4')|safe }}</li>
+                <li>{{ t('card6_item5')|safe }}</li>
+                <li>{{ t('card6_item6')|safe }}</li>
+            </ul>
+        </article>
+
+    </div>
+</section>
+
+{% endblock %}
